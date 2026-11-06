@@ -1,15 +1,11 @@
 import { Head, useForm } from '@inertiajs/react';
 import { Eye, EyeOff, LoaderCircle } from 'lucide-react';
-import { FormEventHandler } from 'react';
+import { FormEventHandler, useState } from 'react';
 
-import InputError from '@/components/input-error';
-import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import AuthLayout from '@/layouts/auth-layout';
-import { useState } from 'react';
 
 interface LoginForm {
     login: string;
@@ -22,7 +18,7 @@ interface LoginProps {
     canResetPassword: boolean;
 }
 
-export default function Login({ status, canResetPassword }: LoginProps) {
+export default function Login({ status }: LoginProps) {
     const { data, setData, post, processing, errors, reset } = useForm<LoginForm>({
         login: '',
         password: '',
@@ -42,94 +38,109 @@ export default function Login({ status, canResetPassword }: LoginProps) {
     };
 
     return (
-        <AuthLayout
-            title="Inicia sesión en tu cuenta"
-            description="Ingresa tu usuario o correo y contraseña para ingresar"
-        >
-            <Head title="Iniciar sesión" />
+        <div className="flex min-h-screen w-full bg-white">
+            <Head title="Iniciar Sesión" />
 
-            <form className="flex flex-col gap-6" onSubmit={submit}>
-                <div className="grid gap-6">
-                    <div className="grid gap-2">
-                        <Label htmlFor="login">Usuario o correo</Label>
-                        <Input
-                            id="login"
-                            type="text"
-                            required
-                            autoFocus
-                            tabIndex={1}
-                            autoComplete="username"
-                            value={data.login}
-                            onChange={(e) => setData('login', e.target.value)}
-                            placeholder="usuario o correo"
-                        />
-                        <InputError message={errors.login} />
+            {/* LADO IZQUIERDO: IMAGEN */}
+            <div 
+                className="hidden md:flex md:w-1/2 bg-cover bg-center bg-slate-100"
+                style={{
+                    backgroundImage: "url('/imagen.jpeg')",
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'top center',
+                    backgroundRepeat: 'no-repeat',
+                }}
+            >
+                <div className="w-full h-full bg-black/10"></div>
+            </div>
+
+            {/* LADO DERECHO: FORMULARIO */}
+            <div className="flex w-full md:w-1/2 flex-col justify-center items-center p-8">
+                
+                <div className="w-full max-w-md space-y-8">
+                    
+                    {/* TÍTULO EN AZUL OSCURO */}
+                    <div className="text-center">
+                        <h1 className="text-3xl font-extrabold text-blue-900 tracking-wider uppercase">
+                            Inicio de Sesión
+                        </h1>
+                        {status && <div className="mt-4 text-sm font-medium text-green-600">{status}</div>}
                     </div>
 
-                    <div className="grid gap-2">
-                        <div className="flex items-center">
-                            <Label htmlFor="password">Contraseña</Label>
-                            {/* {canResetPassword && (
-                                <TextLink href={route('password.request')} className="ml-auto text-sm" tabIndex={5}>
-                                    Forgot password?
-                                </TextLink>
-                            )} */}
-                        </div>
+                    <form className="mt-8 space-y-6" onSubmit={submit}>
                         
-                        <div className="relative">
+                        {/* Campo Usuario */}
+                        <div className="space-y-1">
+                            <Label htmlFor="login" className="text-blue-900 text-sm font-semibold">Usuario o correo</Label>
                             <Input
-                                id="password"
-                                type={showPassword ? 'text' : 'password'}
+                                id="login"
+                                type="text"
                                 required
-                                tabIndex={2}
-                                autoComplete="current-password"
-                                value={data.password}
-                                onChange={(e) => setData('password', e.target.value)}
-                                placeholder="Contraseña"
-                                className="pr-10"
+                                autoFocus
+                                tabIndex={1}
+                                autoComplete="username"
+                                value={data.login}
+                                onChange={(e) => setData('login', e.target.value)}
+                                placeholder="Ingresa tu usuario"
+                                className="bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus-visible:ring-blue-900 focus-visible:border-blue-900 h-11"
                             />
-                            <button
-                                type="button"
-                                onClick={togglePasswordVisibility}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none"
-                                tabIndex={-1}
-                                aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                            >
-                                {showPassword ? (
-                                    <EyeOff className="h-4 w-4" />
-                                ) : (
-                                    <Eye className="h-4 w-4" />
-                                )}
-                            </button>
+                            {errors.login && <span className="text-red-500 text-sm mt-1 block">{errors.login}</span>}
                         </div>
-                        <InputError message={errors.password} />
-                    </div>
 
-                    <div className="flex items-center space-x-3">
-                        <Checkbox
-                            id="remember"
-                            checked={data.remember}
-                            onCheckedChange={(checked) => setData('remember', checked === true)}
-                            tabIndex={3}
-                        />
-                        <Label htmlFor="remember">Recuérdame</Label>
-                    </div>
+                        {/* Campo Contraseña */}
+                        <div className="space-y-1">
+                            <Label htmlFor="password" className="text-blue-900 text-sm font-semibold">Contraseña</Label>
+                            <div className="relative">
+                                <Input
+                                    id="password"
+                                    type={showPassword ? 'text' : 'password'}
+                                    required
+                                    tabIndex={2}
+                                    autoComplete="current-password"
+                                    value={data.password}
+                                    onChange={(e) => setData('password', e.target.value)}
+                                    placeholder="••••••••"
+                                    className="bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus-visible:ring-blue-900 focus-visible:border-blue-900 h-11 pr-10"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={togglePasswordVisibility}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-900 focus:outline-none"
+                                    tabIndex={-1}
+                                >
+                                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                                </button>
+                            </div>
+                            {errors.password && <span className="text-red-500 text-sm mt-1 block">{errors.password}</span>}
+                        </div>
 
-                    <Button type="submit" className="mt-4 w-full" tabIndex={4} disabled={processing}>
-                        {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                        Ingresar
-                    </Button>
+                        {/* Recordarme */}
+                        <div className="flex items-center space-x-3 pt-2">
+                            <Checkbox
+                                id="remember"
+                                checked={data.remember}
+                                onCheckedChange={(checked) => setData('remember', checked === true)}
+                                tabIndex={3}
+                                className="border-slate-400 data-[state=checked]:bg-blue-900 data-[state=checked]:border-blue-900"
+                            />
+                            <Label htmlFor="remember" className="text-blue-900 font-medium cursor-pointer text-sm">
+                                Recuérdame
+                            </Label>
+                        </div>
+
+                        {/* BOTON*/}
+                        <Button 
+                            type="submit" 
+                            tabIndex={4} 
+                            disabled={processing}
+                            className="w-full bg-blue-900 hover:bg-blue-950 text-white font-bold tracking-wider h-11 mt-6 shadow-md shadow-blue-900/20"
+                        >
+                            {processing && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}
+                            INGRESAR
+                        </Button>
+                    </form>
                 </div>
-
-                {/* <div className="text-muted-foreground text-center text-sm">
-                    Don't have an account?{' '}
-                    <TextLink href={route('register')} tabIndex={5}>
-                        Sign up
-                    </TextLink>
-                </div> */}
-            </form>
-
-            {status && <div className="mb-4 text-center text-sm font-medium text-green-600">{status}</div>}
-        </AuthLayout>
+            </div>
+        </div>
     );
 }
