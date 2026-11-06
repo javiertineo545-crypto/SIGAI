@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DataTable } from '@/components/data-table';
 import { getColumns } from './columns';
-import { Plus, Search, CheckCircle2, Laptop, User, Calendar, AlertCircle } from 'lucide-react';
+import { Plus, Search, CheckCircle2, Laptop, User, Calendar, AlertCircle, Package } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
@@ -51,8 +51,8 @@ export default function Index({ asignaciones, filters }: any) {
 
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight">Asignaciones de Equipos</h1>
-                        <p className="text-muted-foreground">Control de equipos entregados a los trabajadores.</p>
+                        <h1 className="text-2xl font-bold tracking-tight">Asignaciones</h1>
+                        <p className="text-muted-foreground">Control de equipos y consumibles entregados a los trabajadores.</p>
                     </div>
                     <Button asChild>
                         <Link href={route('asignaciones.create')}>
@@ -75,7 +75,7 @@ export default function Index({ asignaciones, filters }: any) {
                 <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="text-xl">Detalle de la Asignación</DialogTitle>
-                        <DialogDescription>Información completa de la entrega del equipo.</DialogDescription>
+                        <DialogDescription>Información completa de la entrega.</DialogDescription>
                     </DialogHeader>
 
                     {selectedAsignacion && (
@@ -84,11 +84,11 @@ export default function Index({ asignaciones, filters }: any) {
                                 
                                 <div className="bg-muted/30 p-4 rounded-lg border border-slate-200">
                                     <h3 className="flex items-center gap-2 font-bold mb-3 text-slate-800">
-                                        <Laptop className="h-5 w-5" /> Equipo Entregado
+                                        {selectedAsignacion.es_equipo ? <Laptop className="h-5 w-5" /> : <Package className="h-5 w-5" />} 
+                                        {selectedAsignacion.es_equipo ? 'Equipo Entregado' : 'Consumible Entregado'}
                                     </h3>
                                     <div className="space-y-3 border-l-4 border-blue-500 pl-3">
                                         <div>
-                                            {}
                                             <p className="text-xs text-muted-foreground">Artículo</p>
                                             <p className="font-bold text-red-600 text-lg">
                                                 {selectedAsignacion.articulo_nombre}
@@ -97,16 +97,24 @@ export default function Index({ asignaciones, filters }: any) {
                                                 {selectedAsignacion.marca} - {selectedAsignacion.modelo}
                                             </p>
                                         </div>
-                                        <div className="grid grid-cols-2 gap-2">
-                                            <div>
-                                                <p className="text-xs text-muted-foreground">ID del Equipo</p>
-                                                <p className="font-medium text-sm">{selectedAsignacion.identificador}</p>
+                                        
+                                        {selectedAsignacion.es_equipo ? (
+                                            <div className="grid grid-cols-2 gap-2">
+                                                <div>
+                                                    <p className="text-xs text-muted-foreground">ID del Equipo</p>
+                                                    <p className="font-medium text-sm">{selectedAsignacion.identificador}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-xs text-muted-foreground">Serial Físico</p>
+                                                    <p className="font-medium text-sm">{selectedAsignacion.serial}</p>
+                                                </div>
                                             </div>
+                                        ) : (
                                             <div>
-                                                <p className="text-xs text-muted-foreground">Serial Físico</p>
-                                                <p className="font-medium text-sm">{selectedAsignacion.serial}</p>
+                                                <p className="text-xs text-muted-foreground">Cantidad Entregada</p>
+                                                <p className="font-bold text-lg">{parseInt(selectedAsignacion.cantidad, 10)}</p>
                                             </div>
-                                        </div>
+                                        )}
                                     </div>
                                 </div>
 
@@ -117,14 +125,12 @@ export default function Index({ asignaciones, filters }: any) {
                                     <div className="space-y-3">
                                         <div>
                                             <p className="text-xs text-muted-foreground">Nombre Completo</p>
-                                            {}
                                             <p className="font-bold text-lg">
                                                 {selectedAsignacion.trabajador_nombre}
                                             </p>
                                         </div>
                                         <div>
                                             <p className="text-xs text-muted-foreground">Cédula de Identidad</p>
-                                            {}
                                             <p className="font-medium text-sm">{selectedAsignacion.trabajador_cedula}</p>
                                         </div>
                                     </div>
@@ -140,12 +146,16 @@ export default function Index({ asignaciones, filters }: any) {
                                         <p className="text-xs text-muted-foreground">Fecha de Asignación</p>
                                         <p className="font-medium text-sm">{formatFecha(selectedAsignacion.fecha_asignacion)}</p>
                                     </div>
-                                    <div>
-                                        <p className="text-xs text-muted-foreground">Estado Actual</p>
-                                        <p className={`font-bold text-sm ${selectedAsignacion.estado === 'activa' ? 'text-green-600' : 'text-gray-500'}`}>
-                                            {selectedAsignacion.estado === 'activa' ? 'ACTIVA' : 'DEVUELTA'}
-                                        </p>
-                                    </div>
+                                    
+                                    {/* SOLO MOSTRAMOS EL ESTADO SI ES UN EQUIPO */}
+                                    {selectedAsignacion.es_equipo && (
+                                        <div>
+                                            <p className="text-xs text-muted-foreground">Estado Actual</p>
+                                            <p className={`font-bold text-sm ${selectedAsignacion.estado === 'activa' ? 'text-green-600' : 'text-gray-500'}`}>
+                                                {selectedAsignacion.estado === 'activa' ? 'ACTIVA' : 'DEVUELTA'}
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 

@@ -7,7 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 
 interface FormProps {
-    unidadesDisponibles?: any[];
+    articulos?: any[];
+    unidades?: any[];
     personnels?: any[];
     data: any;
     setData: (key: string, value: any) => void;
@@ -18,7 +19,8 @@ interface FormProps {
 }
 
 export default function Form({ 
-    unidadesDisponibles = [], 
+    articulos = [], 
+    unidades = [], 
     personnels = [], 
     data, 
     setData, 
@@ -28,44 +30,94 @@ export default function Form({
     submitLabel 
 }: FormProps) {
     
+    const articuloSeleccionado = articulos.find((a: any) => a.id === Number(data.articulo_id));
+    const esSerializado = Number(articuloSeleccionado?.control_individual) === 1;
+
+    const unidadesFiltradas = unidades.filter((u: any) => u.articulo_id === Number(data.articulo_id));
+
+    const handleArticuloChange = (val: string) => {
+        setData('articulo_id', val);
+        setData('articulo_unidad_id', '');
+        setData('cantidad', 1);
+    };
+
     return (
         <form onSubmit={onSubmit} className="space-y-6 w-full">
             <Card>
                 <CardHeader>
                     <CardTitle>Datos de la Asignación</CardTitle>
-                    <CardDescription>El equipo dejará de estar disponible hasta que sea devuelto.</CardDescription>
+                    <CardDescription>Selecciona el artículo o equipo y el trabajador que lo recibirá.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label>Equipo (Unidad)</Label>
-                            {}
+                        
+                        <div className="space-y-2 md:col-span-2">
+                            <Label>Artículo o Equipo a Entregar</Label>
                             <Select 
-                                value={data.articulo_unidad_id ? String(data.articulo_unidad_id) : undefined} 
-                                onValueChange={(val) => setData('articulo_unidad_id', val)}
+                                value={data.articulo_id ? String(data.articulo_id) : undefined} 
+                                onValueChange={handleArticuloChange}
                             >
                                 <SelectTrigger className="w-full z-50">
-                                    <SelectValue placeholder="Seleccione el equipo..." />
+                                    <SelectValue placeholder="Seleccione qué se va a entregar..." />
                                 </SelectTrigger>
                                 <SelectContent className="z-50">
-                                    {unidadesDisponibles.length === 0 ? (
-                                        <SelectItem value="no-data" disabled>No hay equipos disponibles</SelectItem>
+                                    {articulos.length === 0 ? (
+                                        <SelectItem value="no-data" disabled>No hay artículos en el inventario</SelectItem>
                                     ) : (
-                                        unidadesDisponibles.map((u: any) => (
-                                            <SelectItem key={u.id} value={String(u.id)}>
-                                                {u.articulo?.nombre} - {u.identificador} {u.serial ? `(${u.serial})` : ''}
+                                        articulos.map((a: any) => (
+                                            <SelectItem key={a.id} value={String(a.id)}>
+                                                {a.nombre}
                                             </SelectItem>
                                         ))
                                     )}
                                 </SelectContent>
                             </Select>
-                            {errors.articulo_unidad_id && <span className="text-sm text-destructive">{errors.articulo_unidad_id}</span>}
+                            {errors.articulo_id && <span className="text-sm text-destructive">{errors.articulo_id}</span>}
                         </div>
+
+                        {esSerializado && (
+                            <div className="space-y-2">
+                                <Label>Serial del Equipo</Label>
+                                <Select 
+                                    value={data.articulo_unidad_id ? String(data.articulo_unidad_id) : undefined} 
+                                    onValueChange={(val) => setData('articulo_unidad_id', val)}
+                                >
+                                    <SelectTrigger className="w-full z-50">
+                                        <SelectValue placeholder="Seleccione el serial..." />
+                                    </SelectTrigger>
+                                    <SelectContent className="z-50">
+                                        {unidadesFiltradas.length === 0 ? (
+                                            <SelectItem value="no-data" disabled>No hay equipos disponibles</SelectItem>
+                                        ) : (
+                                            unidadesFiltradas.map((u: any) => (
+                                                <SelectItem key={u.id} value={String(u.id)}>
+                                                    {u.identificador} {u.serial ? `(${u.serial})` : ''}
+                                                </SelectItem>
+                                            ))
+                                        )}
+                                    </SelectContent>
+                                </Select>
+                                {errors.articulo_unidad_id && <span className="text-sm text-destructive">{errors.articulo_unidad_id}</span>}
+                            </div>
+                        )}
+
+                        {!esSerializado && data.articulo_id && (
+                            <div className="space-y-2">
+                                <Label>Cantidad a entregar (Consumible)</Label>
+                                <Input 
+                                    type="number" 
+                                    min="1"
+                                    step="1"
+                                    value={data.cantidad} 
+                                    onChange={e => setData('cantidad', parseInt(e.target.value) || 1)} 
+                                />
+                                {errors.cantidad && <span className="text-sm text-destructive">{errors.cantidad}</span>}
+                            </div>
+                        )}
 
                         <div className="space-y-2">
                             <Label>Trabajador</Label>
-                            {}
                             <Select 
                                 value={data.personnel_id ? String(data.personnel_id) : undefined} 
                                 onValueChange={(val) => setData('personnel_id', val)}
@@ -123,7 +175,6 @@ export default function Form({
                 <Button variant="outline" type="button" asChild>
                     <Link href={route('asignaciones.index')}>Cancelar</Link>
                 </Button>
-                {}
                 <Button type="submit" disabled={processing}>
                     {processing ? 'Guardando...' : submitLabel}
                 </Button>

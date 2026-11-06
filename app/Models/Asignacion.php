@@ -13,6 +13,8 @@ class Asignacion extends Model
     protected $fillable = [
         'articulo_unidad_id',
         'personnel_id',
+        'articulo_id',
+        'cantidad',
         'usuario_id',
         'fecha_asignacion',
         'fecha_devolucion',
@@ -38,5 +40,10 @@ class Asignacion extends Model
     public function usuario(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function articulo(): BelongsTo
+    {
+        return $this->belongsTo(Articulo::class);
     }
 }

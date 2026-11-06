@@ -81,8 +81,18 @@ export default function Form({ articulos = [], unidades = [], data, setData, err
                         const esSerializado = Number(articulo?.control_individual) === 1;
                         const unidadesArticulo = getUnidadesDeArticulo(detalle.articulo_id);
                         
-                        const stock = articulo ? parseFloat(String(articulo.stock)) : 0;
-                        const excede = detalle.articulo_id ? (!esSerializado && Number(detalle.cantidad) > stock) : false;
+                        // Stock real base
+                        const stockReal = articulo ? parseInt(articulo.stock, 10) : 0;
+
+                        // Sumamos todas las cantidades de este mismo artículo en todas las filas
+                        const totalSolicitado = data.detalles
+                            .filter((d: any) => String(d.articulo_id) === String(detalle.articulo_id))
+                            .reduce((sum: number, d: any) => sum + (Number(d.cantidad) || 0), 0);
+
+                        // Calculamos el stock restante en tiempo real
+                        const stockRestante = stockReal - totalSolicitado;
+                        const excede = detalle.articulo_id ? (!esSerializado && stockRestante < 0) : false;
+                        
                         if (excede) hayErrorDeStock = true;
 
                         const todasAsignadas = esSerializado && unidadesArticulo.length > 0 && unidadesArticulo.every((u: any) => u.asignaciones && u.asignaciones.length > 0);
@@ -141,13 +151,30 @@ export default function Form({ articulos = [], unidades = [], data, setData, err
                                     {!esSerializado && (
                                         <div className="w-full md:w-32 space-y-2 shrink-0">
                                             <Label>Cantidad</Label>
-                                            <Input type="number" min="1" step="0.01" value={detalle.cantidad} onChange={e => updateRow(index, 'cantidad', parseFloat(e.target.value) || 0)} className={excede ? "border-destructive focus-visible:ring-destructive" : ""} />
+                                            <Input 
+                                                type="number" 
+                                                min="1" 
+                                                step="1"
+                                                value={detalle.cantidad} 
+                                                onChange={e => updateRow(index, 'cantidad', parseInt(e.target.value) || 1)}
+                                                className={excede ? "border-destructive focus-visible:ring-destructive" : ""} 
+                                            />
                                         </div>
                                     )}
 
-                                    <div className="w-full md:w-24 pb-3 text-sm font-medium shrink-0">
+                                    {/* AQUÍ MOSTRAMOS EL STOCK DINÁMICO */}
+                                    <div className="w-full md:w-28 pb-3 text-sm font-medium shrink-0 flex flex-col justify-end">
                                         {detalle.articulo_id && !esSerializado ? (
-                                            <span className={excede ? "text-destructive font-bold" : "text-green-600"}>Disp: {stock}</span>
+                                            <div className="flex flex-col">
+                                                <span className={excede ? "text-destructive font-bold" : "text-green-600"}>
+                                                    Disp: {stockRestante}
+                                                </span>
+                                                {totalSolicitado > 0 && (
+                                                    <span className="text-[11px] text-muted-foreground">
+                                                        Total: {stockReal}
+                                                    </span>
+                                                )}
+                                            </div>
                                         ) : <span className="text-muted-foreground">-</span>}
                                     </div>
 
@@ -159,13 +186,13 @@ export default function Form({ articulos = [], unidades = [], data, setData, err
                                 {todasAsignadas && (
                                     <div className="w-full flex items-center gap-2 text-destructive text-sm font-bold mt-2 bg-destructive/10 p-3 rounded-md border border-destructive/20">
                                         <AlertTriangle className="h-5 w-5 shrink-0" />
-                                       No se puede retirar este artículo porque todas sus unidades están asignadas a otros trabajadores.
+                                        Todos los seriales de este artículo están asignados a trabajadores. No puedes dar de baja este equipo hasta que se devuelva en el módulo de Asignaciones.
                                     </div>
                                 )}
 
                                 {excede && (
                                     <div className="w-full flex items-center gap-2 text-destructive text-sm font-bold mt-2 bg-destructive/10 p-3 rounded-md border border-destructive/20">
-                                        <AlertTriangle className="h-5 w-5 shrink-0" /> ¡Atención! Estás pidiendo {detalle.cantidad} en total, pero solo hay {stock} disponibles.
+                                        <AlertTriangle className="h-5 w-5 shrink-0" /> ¡Atención! Estás pidiendo {totalSolicitado} en total, pero solo hay {stockReal} disponibles.
                                     </div>
                                 )}
                             </div>

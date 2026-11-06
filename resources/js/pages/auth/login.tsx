@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 interface LoginForm {
+    [key: string]: string | boolean;
     login: string;
     password: string;
     remember: boolean;

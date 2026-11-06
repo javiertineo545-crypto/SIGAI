@@ -54,7 +54,7 @@ class SalidaController extends Controller
                 'detalles' => $salida->detalles->map(function($detalle) {
                     return [
                         'id' => $detalle->id,
-                        'cantidad' => $detalle->cantidad,
+                        'cantidad' => (int) $detalle->cantidad,
                         'articulo_nombre' => $detalle->articulo?->nombre ?? 'Artículo desconocido',
                         'marca' => $detalle->articulo?->marca?->nombre ?? 'S/M',
                         'modelo' => $detalle->articulo?->modelo ?? 'N/A',
@@ -104,7 +104,7 @@ class SalidaController extends Controller
             'observaciones' => ['nullable', 'string'],
             'detalles' => ['required', 'array', 'min:1'],
             'detalles.*.articulo_id' => ['required', 'integer', 'exists:articulos,id'],
-            'detalles.*.cantidad' => ['required', 'numeric', 'gt:0'],
+            'detalles.*.cantidad' => ['required', 'integer', 'gt:0'], // <-- CAMBIO AQUÍ
             'detalles.*.articulo_unidad_id' => ['nullable', 'integer', 'exists:articulo_unidades,id'],
         ]);
 
@@ -118,7 +118,7 @@ class SalidaController extends Controller
 
             foreach ($data['detalles'] as $detalle) {
                 $articulo = Articulo::query()->lockForUpdate()->findOrFail($detalle['articulo_id']);
-                $cantidad = (float) $detalle['cantidad'];
+                $cantidad = (int) $detalle['cantidad']; // <-- CAMBIO AQUÍ
 
                 if ($articulo->control_individual) {
                     if (empty($detalle['articulo_unidad_id'])) {
@@ -150,7 +150,7 @@ class SalidaController extends Controller
                     }
 
                 } else {
-                    if ((float) $articulo->stock < $cantidad) {
+                    if ((int) $articulo->stock < $cantidad) {
                         throw ValidationException::withMessages([
                             'detalles' => "Stock insuficiente para «{$articulo->nombre}». Stock actual: {$articulo->stock}.",
                         ]);
@@ -173,10 +173,8 @@ class SalidaController extends Controller
     public function show(Salida $salida)
     {
         $salida->load([
-            'usuario',
-            'detalles.articulo.categoria',
+            'usuario.personnel',
             'detalles.articulo.marca',
-            'detalles.articulo.referencia',
             'detalles.articuloUnidad',
         ]);
 

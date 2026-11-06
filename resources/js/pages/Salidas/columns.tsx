@@ -19,7 +19,7 @@ export const getColumns = (onViewDetails: (salida: any) => void): ColumnDef<any>
                     const tieneSerial = detalle.serial && detalle.serial !== 'N/A' && detalle.serial !== 'null';
 
                     return (
-                        <div key={detalle.id} className="mb-2 last:mb-0">
+                        <div key={detalle.id} className="mb-3 last:mb-0 border-b border-slate-100 pb-2 last:border-0 last:pb-0">
                             <span className="text-red-600 block font-bold">
                                 {detalle.articulo_nombre}
                             </span>
@@ -35,6 +35,10 @@ export const getColumns = (onViewDetails: (salida: any) => void): ColumnDef<any>
                                     <span className="font-semibold text-slate-700">Serial:</span> {detalle.serial}
                                 </span>
                             )}
+
+                            <span className="text-xs font-semibold text-slate-700 block mt-1">
+                                Cantidad: {parseInt(detalle.cantidad, 10)}
+                            </span>
                         </div>
                     );
                 })}
