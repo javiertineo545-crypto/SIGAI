@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-// use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ArticuloUnidad extends Model
 {
@@ -42,5 +42,15 @@ class ArticuloUnidad extends Model
     public function entradaDetalle(): BelongsTo
     {
         return $this->belongsTo(EntradaDetalle::class);
+    }
+    //asignaciones
+    public function asignaciones(): HasMany
+    {
+    return $this->hasMany(Asignacion::class);
+    }
+    // salida
+    public function salidasDetalle(): HasMany
+    {
+    return $this->hasMany(SalidaDetalle::class);
     }
 }

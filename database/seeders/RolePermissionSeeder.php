@@ -96,6 +96,16 @@ class RolePermissionSeeder extends Seeder
             [ 'name' => 'entradas.edit-detalle', 'display_name' => 'Editar Unidades de Entradas' ],
             [ 'name' => 'entradas.delete', 'display_name' => 'Eliminar Entradas' ],
 
+            // Permiso de salidas
+            ['name' => 'salidas.view', 'display_name' => 'Ver Salidas'],
+            ['name' => 'salidas.create', 'display_name' => 'Crear Salidas'],
+        ['name' => 'salidas.delete', 'display_name' => 'Eliminar Salidas'],
+
+        // Permisos de Asignaciones 
+            ['name' => 'asignaciones.view', 'display_name' => 'Ver Asignaciones'],
+            ['name' => 'asignaciones.create', 'display_name' => 'Crear Asignaciones'],
+            ['name' => 'asignaciones.devolver', 'display_name' => 'Registrar Devoluciones'],
+
             [ 'name' => 'articulo-unidades.view', 'display_name' => 'Ver Unidades de Artículos', ],
         ];
 

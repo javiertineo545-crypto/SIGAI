@@ -18,6 +18,9 @@ use App\Http\Controllers\ReferenciaController;
 use App\Http\Controllers\ArticuloController;
 use App\Http\Controllers\ArticuloUnidadController;
 use App\Http\Controllers\EntradaController;
+use App\Http\Controllers\SalidaController;
+
+use App\Http\Controllers\AsignacionController;
 
 Route::get('/', function () {
     return redirect('/login');
@@ -71,8 +74,16 @@ Route::middleware(['auth'])->group(function () {
     Route::get('entradas/{entrada}/detalles/{detalle}/edit', [EntradaController::class, 'editDetalle'])->name('entradas.detalles.edit');
     Route::put('entradas/{entrada}/detalles/{detalle}', [EntradaController::class, 'updateDetalle'])->name('entradas.detalles.update');
 
+    // Rutas de Salidas
+    Route::resource('salidas', SalidaController::class)->except(['edit', 'update']);
+    Route::get('articulos/{articulo}/salidas', [SalidaController::class, 'showArticulo'])->name('articulos.salidas');
+   
     Route::get('articulo-unidades', [ArticuloUnidadController::class, 'index'])->name('articulo-unidades.index');
     Route::get('articulo-unidades/{articuloUnidad}', [ArticuloUnidadController::class, 'show'])->name('articulo-unidades.show');
+
+    // rutas de asignaciones
+    Route::resource('asignaciones', AsignacionController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update']);
+    Route::patch('asignaciones/{asignacion}/devolver', [AsignacionController::class, 'devolver'])->name('asignaciones.devolver');
 });
 
 require __DIR__.'/settings.php';

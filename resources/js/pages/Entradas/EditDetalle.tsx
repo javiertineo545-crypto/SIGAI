@@ -62,7 +62,7 @@ interface Detalle {
     id: number;
     cantidad: string | number;
     articulo: Articulo;
-    unidades: Unidad[];
+    : Unidad[];
 }
 
 interface Props {

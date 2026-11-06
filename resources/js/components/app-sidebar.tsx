@@ -29,18 +29,18 @@ const inventoryItems: NavItem[] = [
         icon: ScanEye,
         permission: 'articulo-unidades.view',
     },
-    // {
-    //     title: 'Salidas',
-    //     url: '/salidas',
-    //     icon: ArrowUpFromLine,
-    //     permission: 'salidas.view',
-    // },
-    // {
-    //     title: 'Asignaciones',
-    //     url: '/asignaciones',
-    //     icon: ClipboardCheck,
-    //     permission: 'asignaciones.view',
-    // },
+{
+           title: 'Salidas',
+           url: '/salidas',
+           icon: ArrowUpFromLine,
+           permission: 'salidas.view',
+    },
+    {
+        title: 'Asignaciones',
+        url: '/asignaciones',
+        icon: ClipboardCheck,
+        permission: 'asignaciones.view',
+    },
     // {
     //     title: 'Reportes',
     //     url: '/reportes',
