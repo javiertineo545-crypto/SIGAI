@@ -62,7 +62,7 @@ interface Detalle {
     id: number;
     cantidad: string | number;
     articulo: Articulo;
-    : Unidad[];
+    unidades: Unidad[]; // <-- CORREGIDO AQUí
 }
 
 interface Props {
@@ -155,7 +155,7 @@ export default function EditDetalle({
                         </p>
                     </div>
 
-                    {/* LÍNEA 2: DATOS DEL ARTÍCULO */}
+                    {/* LÍNEA 1: DATOS DEL ARTÍCULO */}
                     <div>
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
                             <div className="space-y-2">
@@ -293,7 +293,6 @@ export default function EditDetalle({
                                             )}
                                             <th className="px-3 py-3 text-left">Estado</th>
                                             <th className="px-3 py-3 text-left">Ubicación</th>
-                                            {/* <th className="px-3 py-3 text-left">Fecha de adquisición</th> */}
                                         </tr>
                                     </thead>
 
