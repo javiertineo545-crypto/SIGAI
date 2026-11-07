@@ -1,8 +1,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { router } from "@inertiajs/react";
-import { Pencil, Package } from "lucide-react";
+import { Eye, Undo2, Package } from "lucide-react";
 
 const formatFecha = (fechaString: string) => {
     if (!fechaString) return '';
@@ -55,8 +54,21 @@ export const getColumns = (onViewDetails: (asignacion: any) => void): ColumnDef<
         cell: ({ row }) => <span className="font-medium text-sm">{formatFecha(row.original.fecha_asignacion)}</span>,
     },
     {
+        accessorKey: "estado",
+        header: "Estado",
+        cell: ({ row }) => {
+            if (!row.original.es_equipo) return <span className="text-muted-foreground text-sm">-</span>;
+            const activa = row.original.estado === 'activa';
+            return (
+                <Badge variant={activa ? 'default' : 'secondary'} className={activa ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-400'}>
+                    {activa ? 'Activa' : 'Devuelta'}
+                </Badge>
+            );
+        },
+    },
+    {
         id: "actions",
-        header: "Acciones",
+        header: () => <div className="text-right">Acciones</div>,
         cell: ({ row }) => {
             const asignacion = row.original;
             const handleDevolver = () => {
@@ -69,44 +81,47 @@ export const getColumns = (onViewDetails: (asignacion: any) => void): ColumnDef<
             };
 
             return (
-                <div className="flex flex-col sm:flex-row gap-2 items-end sm:items-center">
-                    <Button variant="outline" size="sm" onClick={() => onViewDetails(asignacion)}>
-                        Ver Detalle
-                    </Button>
-                    
-                    {asignacion.estado === 'activa' && (
-                        <>
-                            <Button variant="secondary" size="sm" asChild>
-                                <a href={route('asignaciones.edit', asignacion.id)}>
-                                    <Pencil className="h-3 w-3 mr-1" /> Editar
-                                </a>
-                            </Button>
-                            
-                            {asignacion.es_equipo && (
-                                <Button variant="destructive" size="sm" onClick={handleDevolver}>
-                                    Devolver
-                                </Button>
-                            )}
-                        </>
+                <div className="flex justify-end gap-2">
+                    {/* BOTÓN VER DETALLE (OJO) */}
+                    <button
+                        type="button"
+                        onClick={() => onViewDetails(asignacion)}
+                        title="Ver Detalle"
+                        className="
+                            inline-flex h-9 w-9 items-center justify-center
+                            rounded-md border bg-background
+                            text-blue-600
+                            hover:border-blue-300
+                            hover:bg-blue-50
+                            hover:text-blue-700
+                            transition-all duration-200
+                            hover:scale-105
+                        "
+                    >
+                        <Eye className="h-4 w-4" />
+                    </button>
+
+                    {/* BOTÓN DEVOLVER */}
+                    {asignacion.estado === 'activa' && asignacion.es_equipo && (
+                        <button
+                            type="button"
+                            onClick={handleDevolver}
+                            title="Registrar Devolución"
+                            className="
+                                inline-flex h-9 w-9 items-center justify-center
+                                rounded-md border bg-background
+                                text-red-600
+                                hover:border-red-300
+                                hover:bg-red-50
+                                hover:text-red-700
+                                transition-all duration-200
+                                hover:scale-105
+                            "
+                        >
+                            <Undo2 className="h-4 w-4" />
+                        </button>
                     )}
                 </div>
-            );
-        },
-    },
-    {
-        accessorKey: "estado",
-        header: "Estado",
-        cell: ({ row }) => {
-            // SI ES CONSUMIBLE, NO MOSTRAMOS EL ESTADO
-            if (!row.original.es_equipo) {
-                return <span className="text-muted-foreground text-sm">-</span>;
-            }
-
-            const activa = row.original.estado === 'activa';
-            return (
-                <Badge variant={activa ? 'default' : 'secondary'} className={activa ? 'bg-green-600' : 'bg-gray-400'}>
-                    {activa ? 'Activa' : 'Devuelta'}
-                </Badge>
             );
         },
     },

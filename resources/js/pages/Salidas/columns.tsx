@@ -1,5 +1,5 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { Button } from "@/components/ui/button";
+import { Eye } from "lucide-react";
 
 const formatFecha = (fechaString: string) => {
     if (!fechaString) return '';
@@ -66,11 +66,27 @@ export const getColumns = (onViewDetails: (salida: any) => void): ColumnDef<any>
     },
     {
         id: "actions",
+        header: () => <div className="text-right">Acciones</div>,
         cell: ({ row }) => (
-            <div className="text-right">
-                <Button variant="outline" size="sm" onClick={() => onViewDetails(row.original)}>
-                    Ver Detalle
-                </Button>
+            <div className="flex justify-end gap-2">
+                {/* BOTÓN VER DETALLE (OJO) */}
+                <button
+                    type="button"
+                    onClick={() => onViewDetails(row.original)}
+                    title="Ver Detalle"
+                    className="
+                        inline-flex h-9 w-9 items-center justify-center
+                        rounded-md border bg-background
+                        text-blue-600
+                        hover:border-blue-300
+                        hover:bg-blue-50
+                        hover:text-blue-700
+                        transition-all duration-200
+                        hover:scale-105
+                    "
+                >
+                    <Eye className="h-4 w-4" />
+                </button>
             </div>
         ),
     },
