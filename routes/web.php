@@ -24,6 +24,8 @@ use App\Http\Controllers\AsignacionController;
 
 use App\Http\Controllers\ReporteController;
 
+use App\Http\Controllers\DashboardController;
+
 Route::get('/', function () {
     return redirect('/login');
 })->name('home');
@@ -87,7 +89,8 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('asignaciones', AsignacionController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update']);
     Route::patch('asignaciones/{asignacion}/devolver', [AsignacionController::class, 'devolver'])->name('asignaciones.devolver');
 
-
+    //dasboard
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Rutas de reportes
     Route::get('/reportes', [ReporteController::class, 'index'])->name('reportes.index');
