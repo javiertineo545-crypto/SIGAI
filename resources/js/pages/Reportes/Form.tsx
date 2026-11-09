@@ -4,7 +4,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { FileDown, FileText, Calendar as CalendarIcon, Box, Laptop } from 'lucide-react';
+import { 
+    FileDown, 
+    FileText, 
+    Calendar as CalendarIcon, 
+    Box, 
+    Laptop, 
+    PackagePlus, 
+    PackageMinus, 
+    UserCheck 
+} from 'lucide-react';
 
 interface FormProps {
     data: any;
@@ -47,7 +56,7 @@ export default function Form({ data, setData, processing, onSubmit }: FormProps)
                             <div className={`flex items-start space-x-3 p-4 rounded-lg border transition-all ${
                                 data.modulos.includes('inventario') 
                                     ? 'bg-primary/10 border-primary dark:bg-primary/20' 
-                                    : 'bg-transparent border-border hover:bg-muted/50' // <-- CAMBIO AQUÍ
+                                    : 'bg-transparent border-border hover:bg-muted/50'
                             }`}>
                                 <Checkbox 
                                     id="inventario" 
@@ -67,7 +76,7 @@ export default function Form({ data, setData, processing, onSubmit }: FormProps)
                             <div className={`flex items-start space-x-3 p-4 rounded-lg border transition-all ${
                                 data.modulos.includes('unidades') 
                                     ? 'bg-primary/10 border-primary dark:bg-primary/20' 
-                                    : 'bg-transparent border-border hover:bg-muted/50' // <-- CAMBIO AQUÍ
+                                    : 'bg-transparent border-border hover:bg-muted/50'
                             }`}>
                                 <Checkbox 
                                     id="unidades" 
@@ -87,7 +96,7 @@ export default function Form({ data, setData, processing, onSubmit }: FormProps)
                             <div className={`flex items-start space-x-3 p-4 rounded-lg border transition-all ${
                                 data.modulos.includes('entradas') 
                                     ? 'bg-primary/10 border-primary dark:bg-primary/20' 
-                                    : 'bg-transparent border-border hover:bg-muted/50' // <-- CAMBIO AQUÍ
+                                    : 'bg-transparent border-border hover:bg-muted/50'
                             }`}>
                                 <Checkbox 
                                     id="entradas" 
@@ -96,7 +105,9 @@ export default function Form({ data, setData, processing, onSubmit }: FormProps)
                                     className="mt-1"
                                 />
                                 <div className="flex flex-col">
-                                    <Label htmlFor="entradas" className="cursor-pointer font-bold">Entradas</Label>
+                                    <Label htmlFor="entradas" className="cursor-pointer font-bold flex items-center gap-2">
+                                        <PackagePlus className="h-4 w-4 text-primary" /> Entradas
+                                    </Label>
                                     <span className="text-xs text-muted-foreground">Compras</span>
                                 </div>
                             </div>
@@ -105,7 +116,7 @@ export default function Form({ data, setData, processing, onSubmit }: FormProps)
                             <div className={`flex items-start space-x-3 p-4 rounded-lg border transition-all ${
                                 data.modulos.includes('salidas') 
                                     ? 'bg-primary/10 border-primary dark:bg-primary/20' 
-                                    : 'bg-transparent border-border hover:bg-muted/50' // <-- CAMBIO AQUÍ
+                                    : 'bg-transparent border-border hover:bg-muted/50'
                             }`}>
                                 <Checkbox 
                                     id="salidas" 
@@ -114,7 +125,9 @@ export default function Form({ data, setData, processing, onSubmit }: FormProps)
                                     className="mt-1"
                                 />
                                 <div className="flex flex-col">
-                                    <Label htmlFor="salidas" className="cursor-pointer font-bold">Salidas</Label>
+                                    <Label htmlFor="salidas" className="cursor-pointer font-bold flex items-center gap-2">
+                                        <PackageMinus className="h-4 w-4 text-primary" /> Salidas
+                                    </Label>
                                     <span className="text-xs text-muted-foreground">Retiros</span>
                                 </div>
                             </div>
@@ -123,7 +136,7 @@ export default function Form({ data, setData, processing, onSubmit }: FormProps)
                             <div className={`flex items-start space-x-3 p-4 rounded-lg border transition-all ${
                                 data.modulos.includes('asignaciones') 
                                     ? 'bg-primary/10 border-primary dark:bg-primary/20' 
-                                    : 'bg-transparent border-border hover:bg-muted/50' // <-- CAMBIO AQUÍ
+                                    : 'bg-transparent border-border hover:bg-muted/50'
                             }`}>
                                 <Checkbox 
                                     id="asignaciones" 
@@ -132,7 +145,9 @@ export default function Form({ data, setData, processing, onSubmit }: FormProps)
                                     className="mt-1"
                                 />
                                 <div className="flex flex-col">
-                                    <Label htmlFor="asignaciones" className="cursor-pointer font-bold">Asignaciones</Label>
+                                    <Label htmlFor="asignaciones" className="cursor-pointer font-bold flex items-center gap-2">
+                                        <UserCheck className="h-4 w-4 text-primary" /> Asignaciones
+                                    </Label>
                                     <span className="text-xs text-muted-foreground">Entregas</span>
                                 </div>
                             </div>

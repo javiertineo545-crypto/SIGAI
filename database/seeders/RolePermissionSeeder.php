@@ -99,7 +99,7 @@ class RolePermissionSeeder extends Seeder
             // Permiso de salidas
             ['name' => 'salidas.view', 'display_name' => 'Ver Salidas'],
             ['name' => 'salidas.create', 'display_name' => 'Crear Salidas'],
-        ['name' => 'salidas.delete', 'display_name' => 'Eliminar Salidas'],
+            //['name' => 'salidas.delete', 'display_name' => 'Eliminar Salidas'],
 
         // Permisos de Asignaciones 
             ['name' => 'asignaciones.view', 'display_name' => 'Ver Asignaciones'],
@@ -109,7 +109,7 @@ class RolePermissionSeeder extends Seeder
             [ 'name' => 'articulo-unidades.view', 'display_name' => 'Ver Unidades de Artículos', ],
 
             [ 'name' => 'reportes.view', 'display_name' => 'Ver Reportes', ],
-            [ 'name' => 'reportes.export', 'display_name' => 'Exportar Reportes', ],
+            // [ 'name' => 'reportes.export', 'display_name' => 'Exportar Reportes', ],
         ];
 
         foreach ($permissions as $permission) {
