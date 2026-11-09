@@ -5,14 +5,14 @@
     <title>Reporte de Inventario</title>
     <style>
         body { font-family: Arial, sans-serif; font-size: 11px; color: #333; }
-        .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #1e3a8a; padding-bottom: 10px; }
-        .header h1 { margin: 0; color: #1e3a8a; font-size: 20px; }
+        .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid {{ $color_tema }}; padding-bottom: 10px; }
+        .header h1 { margin: 0; color: {{ $color_tema }}; font-size: 20px; }
         .header p { margin: 5px 0 0 0; color: #666; }
         .filters { margin-bottom: 15px; font-size: 12px; background: #f3f4f6; padding: 10px; border-radius: 5px; }
         table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
         th, td { border: 1px solid #d1d5db; padding: 6px; text-align: left; }
-        th { background-color: #f3f4f6; color: #1f2937; font-weight: bold; }
-        .section-title { background-color: #1e3a8a; color: white; padding: 5px; font-size: 14px; margin-top: 20px; margin-bottom: 10px; }
+        th { background-color: {{ $color_tema }}; color: white; font-weight: bold; }
+        .section-title { background-color: {{ $color_tema }}; color: white; padding: 5px; font-size: 14px; margin-top: 20px; margin-bottom: 10px; }
         .text-right { text-align: right; }
         .text-center { text-align: center; }
         .bg-red { background-color: #fee2e2; color: #991b1b; }
@@ -33,7 +33,34 @@
         {{ $fecha_inicio ? $fecha_inicio : 'Todo el historial' }} al {{ $fecha_fin ? $fecha_fin : 'Presente' }}
     </div>
 
-    {{-- REPORTE DE INVENTARIO ACTUAL --}}
+    @if(isset($stock_minimo) && $stock_minimo->count() > 0)
+        <div class="section-title">Alertas de Stock Mínimo (Artículos por agotarse)</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Artículo</th>
+                    <th>Marca</th>
+                    <th>Categoría</th>
+                    <th class="text-center">Stock Actual</th>
+                    <th class="text-center">Stock Mínimo Requerido</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($stock_minimo as $art)
+                    <tr>
+                        <td>{{ $art->nombre }}</td>
+                        <td>{{ $art->marca?->nombre ?? 'S/M' }}</td>
+                        <td>{{ $art->categoria?->nombre ?? 'N/A' }}</td>
+                        <td class="text-center bg-red">
+                            <strong>{{ (int) $art->stock }}</strong>
+                        </td>
+                        <td class="text-center">{{ (int) $art->stock_minimo }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    @endif
+
     @if(isset($articulos) && $articulos->count() > 0)
         <div class="section-title">Inventario Actual en Stock</div>
         <table>
@@ -66,7 +93,6 @@
         </table>
     @endif
 
-    {{-- REPORTE DE UNIDADES FÍSICAS --}}
     @if(isset($unidades) && $unidades->count() > 0)
         <div class="section-title">Unidades Físicas (Equipos Serializados)</div>
         <table>
@@ -95,7 +121,6 @@
         </table>
     @endif
 
-    {{-- REPORTE DE ENTRADAS --}}
     @if(isset($entradas) && $entradas->count() > 0)
         <div class="section-title">Historial de Entradas</div>
         <table>
@@ -122,7 +147,6 @@
         </table>
     @endif
 
-    {{-- REPORTE DE SALIDAS --}}
     @if(isset($salidas) && $salidas->count() > 0)
         <div class="section-title">Historial de Salidas</div>
         <table>
@@ -151,7 +175,6 @@
         </table>
     @endif
 
-    {{-- REPORTE DE ASIGNACIONES --}}
     @if(isset($asignaciones) && $asignaciones->count() > 0)
         <div class="section-title">Historial de Asignaciones</div>
         <table>

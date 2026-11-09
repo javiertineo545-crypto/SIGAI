@@ -4,7 +4,6 @@ import Form from './Form';
 import { Can } from "@/components/can";
 
 export default function Index() {
-    // Inicializamos el formulario con useForm para mayor orden
     const { data, setData, processing } = useForm({
         modulos: ['inventario'],
         fecha_inicio: '',
@@ -24,7 +23,6 @@ export default function Index() {
         if (data.fecha_inicio) params.append('fecha_inicio', data.fecha_inicio);
         if (data.fecha_fin) params.append('fecha_fin', data.fecha_fin);
 
-        // Capturamos el color del tema desde el botón
         const boton = document.getElementById('btn-generar-pdf');
         let colorDelTema = '#eab308'; 
         
@@ -37,7 +35,6 @@ export default function Index() {
         
         params.append('color', colorDelTema);
 
-        // Abrimos el PDF en una nueva pestaña
         window.open(route('reportes.pdf') + '?' + params.toString(), '_blank');
     };
 

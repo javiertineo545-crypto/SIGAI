@@ -3,25 +3,40 @@ import AppLayout from '@/layouts/app-layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
+    Select, 
+    SelectContent, 
+    SelectItem, 
+    SelectTrigger, 
+    SelectValue 
+} from '@/components/ui/select';
+import { 
     Box, Laptop, UserCheck, AlertTriangle, ArrowRight, 
     Package, FileText, Plus, Minus, ClipboardList 
 } from 'lucide-react';
+import { useState } from 'react';
 import { 
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
-    PieChart, Pie, Cell, Legend
+    PieChart, Pie, Cell
 } from 'recharts';
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#a855f7', '#ec4899'];
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#a855f7', '#ec4899', '#14b8a6', '#f43f5e'];
 
 export default function Dashboard({ 
     stats, articulosCriticos, ultimasEntradas, ultimasSalidas, chartCategorias, chartMovimientos 
 }: any) {
-    const { props } = usePage();
-    const user = props.auth?.user as any;
-    
-    // Obtener fecha actual
+    const { props } = usePage<{ auth?: { user?: { name?: string } } }>();
+    const user = props.auth?.user;
     const today = new Date();
     const dateString = today.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+    const [timeRange, setTimeRange] = useState('6m');
+
+    const datosGrafico = chartMovimientos[timeRange] || chartMovimientos['6m'];
+    const datosFormateados = datosGrafico.labels.map((label: string, i: number) => ({
+        name: label,
+        Entradas: datosGrafico.entradas[i],
+        Salidas: datosGrafico.salidas[i]
+    }));
 
     return (
         <AppLayout breadcrumbs={[{ title: 'Dashboard', href: route('dashboard') }]}>
@@ -29,7 +44,6 @@ export default function Dashboard({
             
             <div className="flex flex-col gap-6 p-4 md:p-6 w-full">
                 
-                {/* 1. Saludo y Botones de Acción Rápida */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight capitalize">
@@ -51,7 +65,6 @@ export default function Dashboard({
                     </div>
                 </div>
 
-                {/* 2. Tarjetas Clickeables */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <Link href={route('articulos.index')}>
                         <Card className="hover:bg-muted/50 transition-colors cursor-pointer h-full">
@@ -108,26 +121,29 @@ export default function Dashboard({
                     </Link>
                 </div>
 
-                {/* 3. Gráficos */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-2">
                     
-                    {/* Gráfico de Barras - Movimientos */}
                     <Card className="lg:col-span-2">
-                        <CardHeader>
-                            <CardTitle>Movimientos Recientes (Últimos 6 meses)</CardTitle>
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                            <CardTitle>Movimientos Recientes</CardTitle>
+                            <Select value={timeRange} onValueChange={setTimeRange}>
+                                <SelectTrigger className="w-[180px]">
+                                    <SelectValue placeholder="Seleccionar rango" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="6m">Últimos 6 meses</SelectItem>
+                                    <SelectItem value="3m">Últimos 3 meses</SelectItem>
+                                    <SelectItem value="1w">Última semana</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </CardHeader>
                         <CardContent className="h-[300px]">
                             <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={chartMovimientos.labels.map((label: string, i: number) => ({
-                                    name: label,
-                                    Entradas: chartMovimientos.entradas[i],
-                                    Salidas: chartMovimientos.salidas[i]
-                                }))}>
+                                <BarChart data={datosFormateados}>
                                     <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
                                     <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} />
                                     <YAxis fontSize={12} tickLine={false} axisLine={false} />
                                     <RechartsTooltip cursor={{fill: 'transparent'}} contentStyle={{ borderRadius: '8px' }} />
-                                    <Legend />
                                     <Bar dataKey="Entradas" fill="#22c55e" radius={[4, 4, 0, 0]} />
                                     <Bar dataKey="Salidas" fill="#ef4444" radius={[4, 4, 0, 0]} />
                                 </BarChart>
@@ -135,37 +151,52 @@ export default function Dashboard({
                         </CardContent>
                     </Card>
 
-                    {/* Gráfico de Pastel - Categorías */}
                     <Card>
                         <CardHeader>
                             <CardTitle>Distribución por Categoría</CardTitle>
                         </CardHeader>
-                        <CardContent className="h-[300px]">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                    <Pie
-                                        data={chartCategorias}
-                                        cx="50%" cy="50%"
-                                        innerRadius={60} outerRadius={80}
-                                        paddingAngle={5}
-                                        dataKey="value"
-                                    >
-                                        {chartCategorias.map((entry: any, index: number) => (
-                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                        ))}
-                                    </Pie>
-                                    <RechartsTooltip contentStyle={{ borderRadius: '8px' }} />
-                                    <Legend verticalAlign="bottom" height={36} iconType="circle" />
-                                </PieChart>
-                            </ResponsiveContainer>
+                        <CardContent className="flex flex-col h-[350px]">
+                            <div className="flex-1 min-h-0">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <PieChart>
+                                        <Pie
+                                            data={chartCategorias}
+                                            cx="50%" cy="50%"
+                                            innerRadius={50} 
+                                            outerRadius={80}
+                                            paddingAngle={2}
+                                            dataKey="value"
+                                            minAngle={15}
+                                        >
+                                            {chartCategorias.map((entry: any, index: number) => (
+                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                            ))}
+                                        </Pie>
+                                        <RechartsTooltip contentStyle={{ borderRadius: '8px' }} />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </div>
+                            
+                            <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 text-xs max-h-[100px] overflow-y-auto pr-2">
+                                {chartCategorias.map((cat: any, index: number) => (
+                                    <div key={cat.name} className="flex items-center justify-between gap-2">
+                                        <div className="flex items-center gap-2 overflow-hidden">
+                                            <div 
+                                                className="w-3 h-3 rounded-full shrink-0" 
+                                                style={{ backgroundColor: COLORS[index % COLORS.length] }} 
+                                            />
+                                            <span className="truncate" title={cat.name}>{cat.name}</span>
+                                        </div>
+                                        <strong className="shrink-0">{cat.value}</strong>
+                                    </div>
+                                ))}
+                            </div>
                         </CardContent>
                     </Card>
                 </div>
 
-                {/* 4. Tablas y Listas Rápidas */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-2">
                     
-                    {/* Lista de Stock Crítico */}
                     <Card className="border-orange-200 dark:border-orange-900 bg-orange-50/50 dark:bg-orange-950/20">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2 text-orange-600 dark:text-orange-400 text-lg">
@@ -181,7 +212,7 @@ export default function Dashboard({
                                         <div key={art.id} className="flex justify-between items-center border-b border-orange-200/50 dark:border-orange-900/50 pb-2 last:border-0">
                                             <div>
                                                 <p className="font-semibold text-sm">{art.nombre}</p>
-                                                <p className="text-xs text-muted-foreground">Mínimo requerido: {art.stock_minimo}</p>
+                                                <p className="text-xs text-muted-foreground">Mínimo: {art.stock_minimo}</p>
                                             </div>
                                             <span className="bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-400 font-bold px-2 py-1 rounded text-xs">
                                                 Quedan {parseInt(art.stock, 10)}
@@ -193,7 +224,6 @@ export default function Dashboard({
                         </CardContent>
                     </Card>
 
-                    {/* Últimas Entradas */}
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between">
                             <CardTitle className="flex items-center gap-2 text-lg">
@@ -222,7 +252,6 @@ export default function Dashboard({
                         </CardContent>
                     </Card>
 
-                    {/* Últimas Salidas */}
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between">
                             <CardTitle className="flex items-center gap-2 text-lg">

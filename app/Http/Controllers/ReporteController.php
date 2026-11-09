@@ -30,32 +30,35 @@ class ReporteController extends Controller
 
         $fecha_inicio = $request->input('fecha_inicio');
         $fecha_fin = $request->input('fecha_fin');
+        $color = $request->input('color', '#1e3a8a');
 
         $datos = [];
         
-    
         $queryEntradas = Entrada::with(['proveedor', 'usuario']);
         $querySalidas = Salida::with(['usuario', 'detalles.articulo']);
         $queryAsignaciones = Asignacion::with(['articuloUnidad.articulo', 'personnel', 'usuario']);
         $queryArticulos = Articulo::with(['marca', 'categoria']);
-        
-    
         $queryUnidades = ArticuloUnidad::with(['articulo', 'estado', 'ubicacion']);
-
         
+        $queryStockMinimo = Articulo::with(['marca', 'categoria'])
+            ->whereColumn('stock', '<=', 'stock_minimo')
+            ->orderBy('stock', 'asc');
+
         if ($fecha_inicio && $fecha_fin) {
             $queryEntradas->whereBetween('fecha', [$fecha_inicio, $fecha_fin]);
             $querySalidas->whereBetween('fecha', [$fecha_inicio, $fecha_fin]);
             $queryAsignaciones->whereBetween('fecha_asignacion', [$fecha_inicio, $fecha_fin]);
-            $queryUnidades->whereBetween('fecha_adquisicion', [$fecha_inicio, $fecha_fin]); // <-- Filtro para unidades
+            $queryUnidades->whereBetween('fecha_adquisicion', [$fecha_inicio, $fecha_fin]);
         }
 
-        // Extraer datos
         if (in_array('inventario', $modulos)) {
             $datos['articulos'] = $queryArticulos->orderBy('nombre')->get();
         }
+        if (in_array('stock_minimo', $modulos)) {
+            $datos['stock_minimo'] = $queryStockMinimo->get();
+        }
         if (in_array('unidades', $modulos)) {
-            $datos['unidades'] = $queryUnidades->orderBy('identificador')->get(); // <-- NUEVO
+            $datos['unidades'] = $queryUnidades->orderBy('identificador')->get();
         }
         if (in_array('entradas', $modulos)) {
             $datos['entradas'] = $queryEntradas->orderByDesc('fecha')->get();
@@ -71,6 +74,7 @@ class ReporteController extends Controller
         $datos['fecha_inicio'] = $fecha_inicio;
         $datos['fecha_fin'] = $fecha_fin;
         $datos['fecha_generacion'] = Carbon::now()->format('d/m/Y H:i A');
+        $datos['color_tema'] = $color;
 
         $pdf = Pdf::loadView('reportes.pdf', $datos);
         $pdf->setPaper('a4', 'landscape');

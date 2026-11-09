@@ -1,4 +1,3 @@
-import { Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,7 +11,8 @@ import {
     Laptop, 
     PackagePlus, 
     PackageMinus, 
-    UserCheck 
+    UserCheck,
+    AlertTriangle
 } from 'lucide-react';
 
 interface FormProps {
@@ -50,10 +50,11 @@ export default function Form({ data, setData, processing, onSubmit }: FormProps)
                     <div className="space-y-4">
                         <Label className="text-base font-semibold">¿Qué módulos deseas exportar?</Label>
                         
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                        {/* Cambiamos a 3 columnas para que quepan mejor */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                             
                             {/* INVENTARIO */}
-                            <div className={`flex items-start space-x-3 p-4 rounded-lg border transition-all ${
+                            <div className={`flex items-center space-x-3 p-4 rounded-lg border transition-all ${
                                 data.modulos.includes('inventario') 
                                     ? 'bg-primary/10 border-primary dark:bg-primary/20' 
                                     : 'bg-transparent border-border hover:bg-muted/50'
@@ -62,18 +63,38 @@ export default function Form({ data, setData, processing, onSubmit }: FormProps)
                                     id="inventario" 
                                     checked={data.modulos.includes('inventario')} 
                                     onCheckedChange={() => toggleModulo('inventario')}
-                                    className="mt-1"
                                 />
-                                <div className="flex flex-col">
-                                    <Label htmlFor="inventario" className="cursor-pointer font-bold flex items-center gap-2">
-                                        <Box className="h-4 w-4 text-primary" /> Inventario
+                                <div className="flex flex-col overflow-hidden">
+                                    <Label htmlFor="inventario" className="cursor-pointer font-bold flex items-center gap-2 truncate">
+                                        <Box className="h-4 w-4 text-primary shrink-0" /> 
+                                        <span className="truncate">Inventario</span>
                                     </Label>
-                                    <span className="text-xs text-muted-foreground">Stock actual</span>
+                                    <span className="text-xs text-muted-foreground truncate">Stock general</span>
+                                </div>
+                            </div>
+
+                            {/* STOCK MÍNIMO */}
+                            <div className={`flex items-center space-x-3 p-4 rounded-lg border transition-all ${
+                                data.modulos.includes('stock_minimo') 
+                                    ? 'bg-primary/10 border-primary dark:bg-primary/20' 
+                                    : 'bg-transparent border-border hover:bg-muted/50'
+                            }`}>
+                                <Checkbox 
+                                    id="stock_minimo" 
+                                    checked={data.modulos.includes('stock_minimo')} 
+                                    onCheckedChange={() => toggleModulo('stock_minimo')}
+                                />
+                                <div className="flex flex-col overflow-hidden">
+                                    <Label htmlFor="stock_minimo" className="cursor-pointer font-bold flex items-center gap-2 truncate">
+                                        <AlertTriangle className="h-4 w-4 text-orange-500 shrink-0" /> 
+                                        <span className="truncate">Alertas Stock</span>
+                                    </Label>
+                                    <span className="text-xs text-muted-foreground truncate">Bajos del mínimo</span>
                                 </div>
                             </div>
 
                             {/* UNIDADES FÍSICAS */}
-                            <div className={`flex items-start space-x-3 p-4 rounded-lg border transition-all ${
+                            <div className={`flex items-center space-x-3 p-4 rounded-lg border transition-all ${
                                 data.modulos.includes('unidades') 
                                     ? 'bg-primary/10 border-primary dark:bg-primary/20' 
                                     : 'bg-transparent border-border hover:bg-muted/50'
@@ -82,18 +103,18 @@ export default function Form({ data, setData, processing, onSubmit }: FormProps)
                                     id="unidades" 
                                     checked={data.modulos.includes('unidades')} 
                                     onCheckedChange={() => toggleModulo('unidades')}
-                                    className="mt-1"
                                 />
-                                <div className="flex flex-col">
-                                    <Label htmlFor="unidades" className="cursor-pointer font-bold flex items-center gap-2">
-                                        <Laptop className="h-4 w-4 text-primary" /> Unidades
+                                <div className="flex flex-col overflow-hidden">
+                                    <Label htmlFor="unidades" className="cursor-pointer font-bold flex items-center gap-2 truncate">
+                                        <Laptop className="h-4 w-4 text-primary shrink-0" /> 
+                                        <span className="truncate">Unidades</span>
                                     </Label>
-                                    <span className="text-xs text-muted-foreground">Equipos con serial</span>
+                                    <span className="text-xs text-muted-foreground truncate">Equipos con serial</span>
                                 </div>
                             </div>
 
                             {/* ENTRADAS */}
-                            <div className={`flex items-start space-x-3 p-4 rounded-lg border transition-all ${
+                            <div className={`flex items-center space-x-3 p-4 rounded-lg border transition-all ${
                                 data.modulos.includes('entradas') 
                                     ? 'bg-primary/10 border-primary dark:bg-primary/20' 
                                     : 'bg-transparent border-border hover:bg-muted/50'
@@ -102,18 +123,18 @@ export default function Form({ data, setData, processing, onSubmit }: FormProps)
                                     id="entradas" 
                                     checked={data.modulos.includes('entradas')} 
                                     onCheckedChange={() => toggleModulo('entradas')}
-                                    className="mt-1"
                                 />
-                                <div className="flex flex-col">
-                                    <Label htmlFor="entradas" className="cursor-pointer font-bold flex items-center gap-2">
-                                        <PackagePlus className="h-4 w-4 text-primary" /> Entradas
+                                <div className="flex flex-col overflow-hidden">
+                                    <Label htmlFor="entradas" className="cursor-pointer font-bold flex items-center gap-2 truncate">
+                                        <PackagePlus className="h-4 w-4 text-primary shrink-0" /> 
+                                        <span className="truncate">Entradas</span>
                                     </Label>
-                                    <span className="text-xs text-muted-foreground">Compras</span>
+                                    <span className="text-xs text-muted-foreground truncate">Compras</span>
                                 </div>
                             </div>
 
                             {/* SALIDAS */}
-                            <div className={`flex items-start space-x-3 p-4 rounded-lg border transition-all ${
+                            <div className={`flex items-center space-x-3 p-4 rounded-lg border transition-all ${
                                 data.modulos.includes('salidas') 
                                     ? 'bg-primary/10 border-primary dark:bg-primary/20' 
                                     : 'bg-transparent border-border hover:bg-muted/50'
@@ -122,18 +143,18 @@ export default function Form({ data, setData, processing, onSubmit }: FormProps)
                                     id="salidas" 
                                     checked={data.modulos.includes('salidas')} 
                                     onCheckedChange={() => toggleModulo('salidas')}
-                                    className="mt-1"
                                 />
-                                <div className="flex flex-col">
-                                    <Label htmlFor="salidas" className="cursor-pointer font-bold flex items-center gap-2">
-                                        <PackageMinus className="h-4 w-4 text-primary" /> Salidas
+                                <div className="flex flex-col overflow-hidden">
+                                    <Label htmlFor="salidas" className="cursor-pointer font-bold flex items-center gap-2 truncate">
+                                        <PackageMinus className="h-4 w-4 text-primary shrink-0" /> 
+                                        <span className="truncate">Salidas</span>
                                     </Label>
-                                    <span className="text-xs text-muted-foreground">Retiros</span>
+                                    <span className="text-xs text-muted-foreground truncate">Retiros</span>
                                 </div>
                             </div>
 
                             {/* ASIGNACIONES */}
-                            <div className={`flex items-start space-x-3 p-4 rounded-lg border transition-all ${
+                            <div className={`flex items-center space-x-3 p-4 rounded-lg border transition-all ${
                                 data.modulos.includes('asignaciones') 
                                     ? 'bg-primary/10 border-primary dark:bg-primary/20' 
                                     : 'bg-transparent border-border hover:bg-muted/50'
@@ -142,13 +163,13 @@ export default function Form({ data, setData, processing, onSubmit }: FormProps)
                                     id="asignaciones" 
                                     checked={data.modulos.includes('asignaciones')} 
                                     onCheckedChange={() => toggleModulo('asignaciones')}
-                                    className="mt-1"
                                 />
-                                <div className="flex flex-col">
-                                    <Label htmlFor="asignaciones" className="cursor-pointer font-bold flex items-center gap-2">
-                                        <UserCheck className="h-4 w-4 text-primary" /> Asignaciones
+                                <div className="flex flex-col overflow-hidden">
+                                    <Label htmlFor="asignaciones" className="cursor-pointer font-bold flex items-center gap-2 truncate">
+                                        <UserCheck className="h-4 w-4 text-primary shrink-0" /> 
+                                        <span className="truncate">Asignaciones</span>
                                     </Label>
-                                    <span className="text-xs text-muted-foreground">Entregas</span>
+                                    <span className="text-xs text-muted-foreground truncate">Entregas</span>
                                 </div>
                             </div>
 
