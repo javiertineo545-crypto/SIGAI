@@ -107,6 +107,9 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'asignaciones.devolver', 'display_name' => 'Registrar Devoluciones'],
 
             [ 'name' => 'articulo-unidades.view', 'display_name' => 'Ver Unidades de Artículos', ],
+
+            [ 'name' => 'reportes.view', 'display_name' => 'Ver Reportes', ],
+            [ 'name' => 'reportes.export', 'display_name' => 'Exportar Reportes', ],
         ];
 
         foreach ($permissions as $permission) {

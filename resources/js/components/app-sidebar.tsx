@@ -41,12 +41,12 @@ const inventoryItems: NavItem[] = [
         icon: ClipboardCheck,
         permission: 'asignaciones.view',
     },
-    // {
-    //     title: 'Reportes',
-    //     url: '/reportes',
-    //     icon: FileBarChart2,
-    //     permission: 'reportes.view',
-    // },
+    {
+        title: 'Reportes',
+        url: '/reportes',
+        icon: FileBarChart2,
+        permission: 'reportes.view',
+    },
 ];
 
 const configInventoryItems: NavItem[] = [

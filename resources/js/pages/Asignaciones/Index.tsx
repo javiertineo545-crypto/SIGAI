@@ -7,6 +7,7 @@ import { getColumns } from './columns';
 import { Plus, Search, CheckCircle2, Laptop, User, Calendar, AlertCircle, Package } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Can } from "@/components/can";
 
 const formatFecha = (fechaString: string) => {
     if (!fechaString) return 'N/A';
@@ -54,11 +55,14 @@ export default function Index({ asignaciones, filters }: any) {
                         <h1 className="text-2xl font-bold tracking-tight">Asignaciones</h1>
                         <p className="text-muted-foreground">Control de equipos y consumibles entregados a los trabajadores.</p>
                     </div>
-                    <Button asChild>
-                        <Link href={route('asignaciones.create')}>
-                            <Plus className="mr-2 h-4 w-4" /> Nueva Asignación
-                        </Link>
-                    </Button>
+                    
+                    <Can permission="asignaciones.create">
+                        <Button asChild>
+                            <Link href={route('asignaciones.create')}>
+                                <Plus className="mr-2 h-4 w-4" /> Nueva Asignación
+                            </Link>
+                        </Button>
+                    </Can>
                 </div>
 
                 <form onSubmit={handleSearch} className="flex gap-2 max-w-md">
@@ -147,7 +151,6 @@ export default function Index({ asignaciones, filters }: any) {
                                         <p className="font-medium text-sm">{formatFecha(selectedAsignacion.fecha_asignacion)}</p>
                                     </div>
                                     
-                                    {/* SOLO MOSTRAMOS EL ESTADO SI ES UN EQUIPO */}
                                     {selectedAsignacion.es_equipo && (
                                         <div>
                                             <p className="text-xs text-muted-foreground">Estado Actual</p>

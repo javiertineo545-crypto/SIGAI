@@ -7,6 +7,7 @@ import { getColumns } from './columns';
 import { Plus, Search, CheckCircle2, Package, Calendar, AlertCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Can } from "@/components/can";
 
 const formatFecha = (fechaString: string) => {
     if (!fechaString) return 'N/A';
@@ -54,11 +55,14 @@ export default function Index({ salidas, filters }: any) {
                         <h1 className="text-2xl font-bold tracking-tight">Salidas de Inventario</h1>
                         <p className="text-muted-foreground">Control de artículos y equipos retirados.</p>
                     </div>
-                    <Button asChild>
-                        <Link href={route('salidas.create')}>
-                            <Plus className="mr-2 h-4 w-4" /> Nueva Salida
-                        </Link>
-                    </Button>
+                    
+                    <Can permission="salidas.create">
+                        <Button asChild>
+                            <Link href={route('salidas.create')}>
+                                <Plus className="mr-2 h-4 w-4" /> Nueva Salida
+                            </Link>
+                        </Button>
+                    </Can>
                 </div>
 
                 <form onSubmit={handleSearch} className="flex gap-2 max-w-md">
@@ -71,7 +75,6 @@ export default function Index({ salidas, filters }: any) {
                 </div>
             </div>
 
-            {}
             <Dialog open={!!selectedSalida} onOpenChange={(open) => !open && setSelectedSalida(null)}>
                 <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
@@ -82,7 +85,6 @@ export default function Index({ salidas, filters }: any) {
                     {selectedSalida && (
                         <div className="space-y-6 mt-4">
                             
-                            {}
                             <div className="bg-muted/30 p-4 rounded-lg border border-slate-200">
                                 <h3 className="flex items-center gap-2 font-bold mb-3 text-slate-800">
                                     <Calendar className="h-5 w-5" /> Datos de la Operación
@@ -98,12 +100,11 @@ export default function Index({ salidas, filters }: any) {
                                     </div>
                                     <div>
                                         <p className="text-xs text-muted-foreground">Registrado por</p>
-                                        <p className="font-medium text-sm">{selectedSalida.usuario_name}</p>
+                                        <p className="font-medium text-sm text-slate-800">{selectedSalida.usuario_name}</p>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Tarjeta de Artículos */}
                             <div className="bg-muted/30 p-4 rounded-lg border border-slate-200">
                                 <h3 className="flex items-center gap-2 font-bold mb-3 text-slate-800">
                                     <Package className="h-5 w-5" /> Artículos Retirados
@@ -116,7 +117,6 @@ export default function Index({ salidas, filters }: any) {
                                             <div key={detalle.id} className="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
                                                 <div className="flex flex-col md:flex-row justify-between items-start gap-4">
                                                     
-                                                    {}
                                                     <div className="space-y-3 border-l-4 border-blue-500 pl-3 flex-1">
                                                         <div>
                                                             <p className="text-xs text-muted-foreground">Artículo</p>
@@ -124,11 +124,10 @@ export default function Index({ salidas, filters }: any) {
                                                                 {detalle.articulo_nombre}
                                                             </p>
                                                             <p className="text-sm text-muted-foreground">
-                                                                {detalle.marca} - {detalle.modelo} | Ref: {detalle.referencia}
+                                                                {detalle.marca} - {detalle.modelo}
                                                             </p>
                                                         </div>
                                                         
-                                                        {}
                                                         {tieneSerial && (
                                                             <div className="grid grid-cols-2 gap-2 mt-2">
                                                                 <div>
@@ -143,7 +142,6 @@ export default function Index({ salidas, filters }: any) {
                                                         )}
                                                     </div>
 
-                                                    {}
                                                     <div className="shrink-0 w-full md:w-auto text-left md:text-right border-t md:border-t-0 pt-3 md:pt-0 mt-3 md:mt-0">
                                                         <p className="text-xs text-muted-foreground mb-1">Cantidad Retirada</p>
                                                         <span className="bg-slate-100 border border-slate-200 text-slate-800 font-bold px-4 py-2 rounded-lg text-lg inline-block">
@@ -157,7 +155,6 @@ export default function Index({ salidas, filters }: any) {
                                 </div>
                             </div>
 
-                            {}
                             <div className="bg-muted/30 p-4 rounded-lg border border-slate-200">
                                 <h3 className="flex items-center gap-2 font-bold mb-2 text-slate-800">
                                     <AlertCircle className="h-5 w-5" /> Observaciones

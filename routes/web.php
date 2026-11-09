@@ -22,6 +22,8 @@ use App\Http\Controllers\SalidaController;
 
 use App\Http\Controllers\AsignacionController;
 
+use App\Http\Controllers\ReporteController;
+
 Route::get('/', function () {
     return redirect('/login');
 })->name('home');
@@ -84,6 +86,12 @@ Route::middleware(['auth'])->group(function () {
     // rutas de asignaciones
     Route::resource('asignaciones', AsignacionController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update']);
     Route::patch('asignaciones/{asignacion}/devolver', [AsignacionController::class, 'devolver'])->name('asignaciones.devolver');
+
+
+
+    // Rutas de reportes
+    Route::get('/reportes', [ReporteController::class, 'index'])->name('reportes.index');
+    Route::get('/reportes/exportar', [ReporteController::class, 'exportPdf'])->name('reportes.pdf');
 });
 
 require __DIR__.'/settings.php';
