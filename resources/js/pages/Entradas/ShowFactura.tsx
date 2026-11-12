@@ -4,6 +4,7 @@ import { type BreadcrumbItem } from '@/types';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Pencil } from 'lucide-react';
 import { Can } from '@/components/can';
+import QRCodeDisplay from '@/components/QRCodeDisplay';
 
 interface Proveedor {
     id: number;
@@ -71,13 +72,11 @@ export default function ShowFactura({ entrada }: Props) {
             <Head title={`Factura ${entrada.numero_documento ?? entrada.id}`} />
 
             <div className="space-y-6 p-6">
-                {/* ENCABEZADO */}
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-xl font-semibold">
                             Factura {entrada.numero_documento ?? `#${entrada.id}`}
                         </h1>
-
                         <p className="mt-1 text-sm text-muted-foreground">
                             Consulta completa de la factura y sus artículos registrados.
                         </p>
@@ -102,7 +101,6 @@ export default function ShowFactura({ entrada }: Props) {
                     </div>
                 </div>
 
-                {/* INFORMACIÓN GENERAL */}
                 <div className="rounded-lg border bg-background p-6 space-y-5">
                     <h2 className="text-lg font-semibold">
                         Información de la factura
@@ -146,7 +144,6 @@ export default function ShowFactura({ entrada }: Props) {
                     </div>
                 </div>
 
-                {/* RESUMEN */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div className="rounded-lg border bg-background p-5">
                         <p className="text-sm text-muted-foreground">
@@ -167,13 +164,11 @@ export default function ShowFactura({ entrada }: Props) {
                     </div>
                 </div>
 
-                {/* ARTÍCULOS */}
                 <div className="rounded-lg border bg-background p-6 space-y-5">
                     <div>
                         <h2 className="text-lg font-semibold">
                             Artículos incluidos
                         </h2>
-
                         <p className="mt-1 text-sm text-muted-foreground">
                             Todos los artículos registrados en esta factura.
                         </p>
@@ -191,11 +186,9 @@ export default function ShowFactura({ entrada }: Props) {
                                             <p className="text-xs text-muted-foreground">
                                                 Artículo {index + 1}
                                             </p>
-
                                             <h3 className="font-semibold">
                                                 {detalle.articulo?.nombre ?? 'Artículo no disponible'}
                                             </h3>
-
                                             <p className="mt-1 text-sm text-muted-foreground">
                                                 {detalle.articulo?.marca?.nombre ?? 'Sin marca'}
                                                 {' · '}
@@ -204,7 +197,6 @@ export default function ShowFactura({ entrada }: Props) {
                                                 {detalle.articulo?.referencia?.codigo ?? 'Sin referencia'}
                                             </p>
                                         </div>
-
                                         <div className="rounded-md bg-muted px-3 py-2 text-sm">
                                             Cantidad: <strong>{Number(detalle.cantidad)}</strong>
                                         </div>
@@ -224,6 +216,7 @@ export default function ShowFactura({ entrada }: Props) {
                                                             <th className="px-3 py-2 text-left font-medium">Serial</th>
                                                             <th className="px-3 py-2 text-left font-medium">Ubicación</th>
                                                             <th className="px-3 py-2 text-left font-medium">Estado</th>
+                                                            <th className="px-3 py-2 text-left font-medium">Código QR</th>
                                                         </tr>
                                                     </thead>
 
@@ -233,17 +226,21 @@ export default function ShowFactura({ entrada }: Props) {
                                                                 <td className="px-3 py-2 font-medium">
                                                                     {unidad.identificador}
                                                                 </td>
-
                                                                 <td className="px-3 py-2">
                                                                     {unidad.serial || ' - '}
                                                                 </td>
-
                                                                 <td className="px-3 py-2">
                                                                     {unidad.ubicacion?.nombre ?? 'Sin ubicación'}
                                                                 </td>
-
                                                                 <td className="px-3 py-2">
                                                                     {unidad.estado?.nombre ?? 'Sin estado'}
+                                                                </td>
+                                                                <td className="px-3 py-2">
+                                                                    <QRCodeDisplay 
+                                                                        value={unidad.identificador} 
+                                                                        articulo={detalle.articulo?.nombre}
+                                                                        serial={unidad.serial || 'N/A'}
+                                                                    />
                                                                 </td>
                                                             </tr>
                                                         ))}

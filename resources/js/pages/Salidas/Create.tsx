@@ -12,6 +12,7 @@ export default function Create({ articulos = [], unidades = [] }: any) {
     const { data, setData, post, processing, errors } = useForm({
         fecha: getToday(), 
         motivo: '',
+        tipo_salida: 'desincorporacion',
         observaciones: '',
         detalles: [{ _id: Date.now().toString(), articulo_id: '', articulo_unidad_id: '', cantidad: 1 }]
     });

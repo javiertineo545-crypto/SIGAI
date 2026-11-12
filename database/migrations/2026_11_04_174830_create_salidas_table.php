@@ -11,13 +11,16 @@ return new class extends Migration
         Schema::create('salidas', function (Blueprint $table) {
             $table->id();
 
-            // registra salida
             $table->foreignId('usuario_id')
                 ->constrained('users')
                 ->restrictOnDelete()
                 ->cascadeOnUpdate();
 
             $table->string('motivo');
+            
+            // Los dos tipos de salida
+            $table->enum('tipo_salida', ['traslado', 'desincorporacion'])->default('desincorporacion');
+
             $table->date('fecha');
             $table->text('observaciones')->nullable();
 

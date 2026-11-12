@@ -8,6 +8,7 @@ import { Plus, Search, CheckCircle2, Laptop, User, Calendar, AlertCircle, Packag
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Can } from "@/components/can";
+import QRCodeDisplay from '@/components/QRCodeDisplay';
 
 const formatFecha = (fechaString: string) => {
     if (!fechaString) return 'N/A';
@@ -76,100 +77,109 @@ export default function Index({ asignaciones, filters }: any) {
             </div>
 
             <Dialog open={!!selectedAsignacion} onOpenChange={(open) => !open && setSelectedAsignacion(null)}>
-                <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="text-xl">Detalle de la Asignación</DialogTitle>
-                        <DialogDescription>Información completa de la entrega.</DialogDescription>
+                        <DialogDescription>Información de la entrega y del equipo.</DialogDescription>
                     </DialogHeader>
 
                     {selectedAsignacion && (
                         <div className="space-y-6 mt-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                
-                                <div className="bg-muted/30 p-4 rounded-lg border border-slate-200">
-                                    <h3 className="flex items-center gap-2 font-bold mb-3 text-slate-800">
-                                        {selectedAsignacion.es_equipo ? <Laptop className="h-5 w-5" /> : <Package className="h-5 w-5" />} 
-                                        {selectedAsignacion.es_equipo ? 'Equipo Entregado' : 'Consumible Entregado'}
-                                    </h3>
-                                    <div className="space-y-3 border-l-4 border-blue-500 pl-3">
+                            
+                            <div className="bg-muted/30 p-5 rounded-lg border border-slate-200">
+                                <h3 className="flex items-center gap-2 font-bold mb-4 text-slate-800">
+                                    <User className="h-5 w-5" /> Datos de la Asignación
+                                </h3>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div>
+                                        <p className="text-xs text-muted-foreground">Trabajador</p>
+                                        <p className="font-bold text-lg">{selectedAsignacion.trabajador_nombre}</p>
+                                        <p className="text-sm text-muted-foreground">C.I: {selectedAsignacion.trabajador_cedula}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-muted-foreground">Fecha de Asignación</p>
+                                        <p className="font-medium text-base">{formatFecha(selectedAsignacion.fecha_asignacion)}</p>
+                                    </div>
+                                    {selectedAsignacion.es_equipo && (
                                         <div>
+                                            <p className="text-xs text-muted-foreground">Estado Actual</p>
+                                            <p className={`font-bold text-base ${selectedAsignacion.estado === 'activa' ? 'text-green-600' : 'text-gray-500'}`}>
+                                                {selectedAsignacion.estado === 'activa' ? 'ACTIVA' : 'DEVUELTA'}
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="mt-4 pt-4 border-t border-slate-200">
+                                    <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                                        <AlertCircle className="h-3 w-3" /> Observaciones
+                                    </p>
+                                    <p className="whitespace-pre-wrap text-sm text-slate-700">
+                                        {selectedAsignacion.observaciones || 'Sin observaciones registradas.'}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="bg-muted/30 p-5 rounded-lg border border-slate-200 w-full transition-all duration-300">
+                                <h3 className="flex items-center gap-2 font-bold mb-4 text-slate-800">
+                                    {selectedAsignacion.es_equipo ? <Laptop className="h-5 w-5" /> : <Package className="h-5 w-5" />} 
+                                    {selectedAsignacion.es_equipo ? 'Equipo Entregado' : 'Consumible Entregado'}
+                                </h3>
+                                
+                                {selectedAsignacion.es_equipo ? (
+                                    <div className="flex flex-col md:flex-row gap-6 items-start">
+                                        <div className="space-y-4 border-l-4 border-blue-500 pl-4 flex-1">
+                                            <div>
+                                                <p className="text-xs text-muted-foreground">Artículo</p>
+                                                <p className="font-bold text-red-600 text-xl">
+                                                    {selectedAsignacion.articulo_nombre}
+                                                </p>
+                                                <p className="text-sm text-muted-foreground">
+                                                    {selectedAsignacion.marca} - {selectedAsignacion.modelo}
+                                                </p>
+                                            </div>
+                                            
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <p className="text-xs text-muted-foreground">ID del Equipo</p>
+                                                    <p className="font-medium text-base">{selectedAsignacion.identificador}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-xs text-muted-foreground">Serial Físico</p>
+                                                    <p className="font-medium text-base">{selectedAsignacion.serial !== 'N/A' ? selectedAsignacion.serial : 'No registrado'}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {selectedAsignacion.identificador !== 'N/A' && (
+                                            <div className="shrink-0 w-full md:w-auto flex justify-center">
+                                                <QRCodeDisplay 
+                                                    value={selectedAsignacion.identificador} 
+                                                    articulo={selectedAsignacion.articulo_nombre}
+                                                    serial={selectedAsignacion.serial}
+                                                    label="Código QR" 
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-l-4 border-blue-500 pl-4">
+                                        <div className="md:col-span-2">
                                             <p className="text-xs text-muted-foreground">Artículo</p>
-                                            <p className="font-bold text-red-600 text-lg">
+                                            <p className="font-bold text-red-600 text-xl">
                                                 {selectedAsignacion.articulo_nombre}
                                             </p>
                                             <p className="text-sm text-muted-foreground">
                                                 {selectedAsignacion.marca} - {selectedAsignacion.modelo}
                                             </p>
                                         </div>
-                                        
-                                        {selectedAsignacion.es_equipo ? (
-                                            <div className="grid grid-cols-2 gap-2">
-                                                <div>
-                                                    <p className="text-xs text-muted-foreground">ID del Equipo</p>
-                                                    <p className="font-medium text-sm">{selectedAsignacion.identificador}</p>
-                                                </div>
-                                                <div>
-                                                    <p className="text-xs text-muted-foreground">Serial Físico</p>
-                                                    <p className="font-medium text-sm">{selectedAsignacion.serial}</p>
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            <div>
-                                                <p className="text-xs text-muted-foreground">Cantidad Entregada</p>
-                                                <p className="font-bold text-lg">{parseInt(selectedAsignacion.cantidad, 10)}</p>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <div className="bg-muted/30 p-4 rounded-lg border border-slate-200">
-                                    <h3 className="flex items-center gap-2 font-bold mb-3 text-slate-800">
-                                        <User className="h-5 w-5" /> Recibido por
-                                    </h3>
-                                    <div className="space-y-3">
                                         <div>
-                                            <p className="text-xs text-muted-foreground">Nombre Completo</p>
-                                            <p className="font-bold text-lg">
-                                                {selectedAsignacion.trabajador_nombre}
-                                            </p>
-                                        </div>
-                                        <div>
-                                            <p className="text-xs text-muted-foreground">Cédula de Identidad</p>
-                                            <p className="font-medium text-sm">{selectedAsignacion.trabajador_cedula}</p>
+                                            <p className="text-xs text-muted-foreground">Cantidad Entregada</p>
+                                            <p className="font-bold text-xl mt-1">{parseInt(selectedAsignacion.cantidad, 10)}</p>
                                         </div>
                                     </div>
-                                </div>
+                                )}
                             </div>
 
-                            <div className="bg-muted/30 p-4 rounded-lg border border-slate-200">
-                                <h3 className="flex items-center gap-2 font-bold mb-3 text-slate-800">
-                                    <Calendar className="h-5 w-5" /> Datos de la Operación
-                                </h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <p className="text-xs text-muted-foreground">Fecha de Asignación</p>
-                                        <p className="font-medium text-sm">{formatFecha(selectedAsignacion.fecha_asignacion)}</p>
-                                    </div>
-                                    
-                                    {selectedAsignacion.es_equipo && (
-                                        <div>
-                                            <p className="text-xs text-muted-foreground">Estado Actual</p>
-                                            <p className={`font-bold text-sm ${selectedAsignacion.estado === 'activa' ? 'text-green-600' : 'text-gray-500'}`}>
-                                                {selectedAsignacion.estado === 'activa' ? 'ACTIVA' : 'DEVUELTA'}
-                                            </p>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-
-                            <div className="bg-muted/30 p-4 rounded-lg border border-slate-200">
-                                <h3 className="flex items-center gap-2 font-bold mb-2 text-slate-800">
-                                    <AlertCircle className="h-5 w-5" /> Observaciones
-                                </h3>
-                                <p className="whitespace-pre-wrap text-sm text-muted-foreground">
-                                    {selectedAsignacion.observaciones || 'Sin observaciones registradas.'}
-                                </p>
-                            </div>
                         </div>
                     )}
                 </DialogContent>

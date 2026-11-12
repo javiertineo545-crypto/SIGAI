@@ -13,6 +13,7 @@ class Salida extends Model
     protected $fillable = [
         'usuario_id',
         'motivo',
+        'tipo_salida',
         'fecha',
         'observaciones',
     ];
@@ -26,8 +27,8 @@ class Salida extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function detalles(): HasMany
+    public function detalles():HasMany
     {
-        return $this->hasMany(SalidaDetalle::class);
+        return $this->hasMany(salidaDetalle::class,'salida_id');
     }
 }
