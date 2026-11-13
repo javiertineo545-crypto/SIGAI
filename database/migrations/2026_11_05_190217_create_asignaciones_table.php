@@ -11,28 +11,27 @@ return new class extends Migration
         Schema::create('asignaciones', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('articulo_unidad_id')
-                ->constrained('articulo_unidades')
-                ->restrictOnDelete()
-                ->cascadeOnUpdate();
-
-            $table->foreignId('personnel_id')
-                ->constrained('personnels')
-                ->restrictOnDelete()
-                ->cascadeOnUpdate();
-
-            $table->foreignId('usuario_id')
-                ->constrained('users')
-                ->restrictOnDelete()
-                ->cascadeOnUpdate();
-
+            // Relaciones
+            $table->foreignId('articulo_unidad_id')->nullable()->constrained('articulo_unidades')->nullOnDelete();
+            $table->foreignId('articulo_id')->nullable()->constrained('articulos')->nullOnDelete();
+            $table->foreignId('personnel_id')->constrained('personnels')->restrictOnDelete();
+            $table->foreignId('usuario_id')->constrained('users')->restrictOnDelete();
+            
+            // Datos generales
+            $table->decimal('cantidad', 12, 2)->default(1);
             $table->date('fecha_asignacion');
             $table->date('fecha_devolucion')->nullable();
-            
-            
             $table->enum('estado', ['activa', 'devuelta'])->default('activa');
-            
+            $table->string('condicion_entrega')->nullable();
             $table->text('observaciones')->nullable();
+
+            // Lógica de negocio (Préstamo, Traslado, Guarda)
+            $table->enum('tipo_asignacion', ['prestamo', 'traslado', 'guarda_custodia'])->default('prestamo');
+            $table->boolean('es_tiempo_indefinido')->default(false);
+            $table->date('fecha_estimada_devolucion')->nullable();
+            
+            // Ubicación para el traslado
+            $table->foreignId('ubicacion_destino_id')->nullable()->constrained('ubicaciones')->nullOnDelete();
 
             $table->timestamps();
         });

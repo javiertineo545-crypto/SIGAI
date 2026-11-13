@@ -94,6 +94,7 @@ Route::middleware(['auth'])->group(function () {
     // rutas de asignaciones
     Route::resource('asignaciones', AsignacionController::class)->only(['index', 'create', 'store', 'show', 'edit', 'update']);
     Route::patch('asignaciones/{asignacion}/devolver', [AsignacionController::class, 'devolver'])->name('asignaciones.devolver');
+    Route::post('/asignaciones/{asignacion}/reasignar', [AsignacionController::class, 'reasignar'])->name('asignaciones.reasignar');
 
     //dasboard
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');

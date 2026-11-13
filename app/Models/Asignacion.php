@@ -17,6 +17,8 @@ class Asignacion extends Model
         'cantidad',
         'usuario_id',
         'fecha_asignacion',
+        'tipo_asignacion',
+        'ubicacion_destino_id',
         'fecha_devolucion',
         'estado',
         'observaciones',
@@ -45,5 +47,9 @@ class Asignacion extends Model
     public function articulo(): BelongsTo
     {
         return $this->belongsTo(Articulo::class);
+    }
+    public function ubicacionDestino(): BelongsTo
+    {
+        return $this->belongsTo(Ubicacion::class, 'ubicacion_destino_id');
     }
 }

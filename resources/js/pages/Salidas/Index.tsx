@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DataTable } from '@/components/data-table';
 import { getColumns } from './columns';
-import { Plus, Search, CheckCircle2, Package, Calendar, AlertCircle } from 'lucide-react';
+import { Plus, Search, CheckCircle2, Package, Calendar, AlertCircle, User } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Can } from "@/components/can";
@@ -19,7 +19,7 @@ const formatFecha = (fechaString: string) => {
 
 const formatTipo = (tipo: string) => {
     const tipos: Record<string, string> = {
-        'traslado': 'Traslado',
+        'traspaso': 'Traspaso',
         'desincorporacion': 'Desincorporación'
     };
     return tipos[tipo] || tipo || 'No aplica';
@@ -84,7 +84,6 @@ export default function Index({ salidas, filters }: any) {
                 </div>
             </div>
 
-            {/* MODAL DE DETALLES VERTICAL */}
             <Dialog open={!!selectedSalida} onOpenChange={(open) => !open && setSelectedSalida(null)}>
                 <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
@@ -95,43 +94,57 @@ export default function Index({ salidas, filters }: any) {
                     {selectedSalida && (
                         <div className="space-y-6 mt-4">
                             
-                            <div className="bg-muted/30 p-5 rounded-lg border border-slate-200">
-                                <h3 className="flex items-center gap-2 font-bold mb-4 text-slate-800">
+                            {/* DATOS DE LA OPERACIÓN */}
+                            <div className="bg-muted/40 p-5 rounded-lg border border-border">
+                                <h3 className="flex items-center gap-2 font-bold mb-4 text-foreground">
                                     <Calendar className="h-5 w-5" /> Datos de la Operación
                                 </h3>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <div>
                                         <p className="text-xs text-muted-foreground">Motivo</p>
-                                        <p className="font-bold text-base text-slate-800">{selectedSalida.motivo}</p>
+                                        <p className="font-bold text-base text-foreground">{selectedSalida.motivo}</p>
                                     </div>
                                     <div>
                                         <p className="text-xs text-muted-foreground">Tipo de Salida</p>
-                                        <p className={`font-bold ${selectedSalida.tipo_salida === 'traslado' ? 'text-orange-500' : 'text-red-500'}`}>
+                                        <p className={`font-bold text-base ${selectedSalida.tipo_salida === 'desincorporacion' ? 'text-destructive' : 'text-orange-600 dark:text-orange-400'}`}>
                                             {formatTipo(selectedSalida.tipo_salida)}
                                         </p>
                                     </div>
                                     <div>
                                         <p className="text-xs text-muted-foreground">Fecha de Salida</p>
-                                        <p className="font-medium text-base">{formatFecha(selectedSalida.fecha)}</p>
+                                        <p className="font-medium text-base text-foreground">{formatFecha(selectedSalida.fecha)}</p>
                                     </div>
                                     <div>
                                         <p className="text-xs text-muted-foreground">Registrado por</p>
-                                        <p className="font-medium text-base text-slate-800">{selectedSalida.usuario_name}</p>
+                                        <p className="font-medium text-base text-foreground">{selectedSalida.usuario_name}</p>
                                     </div>
                                 </div>
 
-                                <div className="mt-4 pt-4 border-t border-slate-200">
+                                {/* AQUÍ ESTÁ EL RECUADRO DE ENTIDAD DESTINO */}
+                                {selectedSalida.tipo_salida === 'traspaso' && (
+                                    <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                                        <p className="text-xs text-foreground dark:text-red-400 font-semibold mb-1 flex items-center gap-1">
+                                            <User className="h-3 w-3" /> Entregado a (Entidad/Persona)
+                                        </p>
+                                        <p className="font-bold text-red-600 dark:text-red-400 text-base">
+                                            {selectedSalida.entidad_destino || 'No registrado'}
+                                        </p>
+                                    </div>
+                                )}
+
+                                <div className="mt-4 pt-4 border-t border-border">
                                     <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
                                         <AlertCircle className="h-3 w-3" /> Observaciones
                                     </p>
-                                    <p className="whitespace-pre-wrap text-sm text-slate-700">
+                                    <p className="whitespace-pre-wrap text-sm text-foreground">
                                         {selectedSalida.observaciones || 'Sin observaciones registradas.'}
                                     </p>
                                 </div>
                             </div>
 
-                            <div className="bg-muted/30 p-5 rounded-lg border border-slate-200">
-                                <h3 className="flex items-center gap-2 font-bold mb-4 text-slate-800">
+                            {/* ARTÍCULOS */}
+                            <div className="bg-muted/40 p-5 rounded-lg border border-border">
+                                <h3 className="flex items-center gap-2 font-bold mb-4 text-foreground">
                                     <Package className="h-5 w-5" /> Artículos Retirados
                                 </h3>
                                 <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
@@ -139,14 +152,14 @@ export default function Index({ salidas, filters }: any) {
                                         const esEquipo = detalle.identificador && detalle.identificador !== 'N/A';
 
                                         return (
-                                            <div key={detalle.id} className="bg-white p-4 rounded-lg shadow-sm border border-slate-200 w-full transition-all">
+                                            <div key={detalle.id} className="bg-card p-4 rounded-lg shadow-sm border border-border w-full transition-all">
                                                 
                                                 {esEquipo ? (
                                                     <div className="flex flex-col md:flex-row gap-6 items-start">
                                                         <div className="space-y-3 border-l-4 border-blue-500 pl-4 flex-1">
                                                             <div>
                                                                 <p className="text-xs text-muted-foreground">Artículo</p>
-                                                                <p className="font-bold text-lg text-red-600">
+                                                                <p className="font-bold text-lg text-destructive">
                                                                     {detalle.articulo_nombre}
                                                                 </p>
                                                                 <p className="text-sm text-muted-foreground">
@@ -157,17 +170,17 @@ export default function Index({ salidas, filters }: any) {
                                                             <div className="grid grid-cols-2 gap-4">
                                                                 <div>
                                                                     <p className="text-xs text-muted-foreground">ID del Equipo</p>
-                                                                    <p className="font-medium text-sm">{detalle.identificador}</p>
+                                                                    <p className="font-medium text-sm text-foreground">{detalle.identificador}</p>
                                                                 </div>
                                                                 <div>
                                                                     <p className="text-xs text-muted-foreground">Serial Físico</p>
-                                                                    <p className="font-medium text-sm">{detalle.serial !== 'N/A' ? detalle.serial : 'No registrado'}</p>
+                                                                    <p className="font-medium text-sm text-foreground">{detalle.serial !== 'N/A' ? detalle.serial : 'No registrado'}</p>
                                                                 </div>
                                                             </div>
 
                                                             <div>
                                                                 <p className="text-xs text-muted-foreground">Cantidad Retirada</p>
-                                                                <span className="bg-slate-100 border border-slate-200 text-slate-800 font-bold px-3 py-1 rounded text-sm inline-block">
+                                                                <span className="bg-muted text-foreground border border-border font-bold px-3 py-1 rounded text-sm inline-block">
                                                                     {parseInt(detalle.cantidad, 10)}
                                                                 </span>
                                                             </div>
@@ -186,16 +199,22 @@ export default function Index({ salidas, filters }: any) {
                                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-l-4 border-blue-500 pl-4">
                                                         <div className="md:col-span-2">
                                                             <p className="text-xs text-muted-foreground">Artículo</p>
-                                                            <p className="font-bold text-lg text-red-600">
+                                                            <p className="font-bold text-lg text-destructive">
                                                                 {detalle.articulo_nombre}
                                                             </p>
-                                                            <p className="text-sm text-muted-foreground">
+                                                            <p className="text-sm text-muted-foreground mb-2">
                                                                 {detalle.marca} - {detalle.modelo}
                                                             </p>
+                                                            
+                                                            <span className="flex items-center gap-1 mt-1">
+                                                                <span className="bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400 border border-orange-300 dark:border-orange-700 text-[10px] px-2 py-0.5 rounded-full font-bold">
+                                                                    Consumible
+                                                                </span>
+                                                            </span>
                                                         </div>
                                                         <div>
                                                             <p className="text-xs text-muted-foreground">Cantidad Retirada</p>
-                                                            <p className="font-bold text-lg mt-1">
+                                                            <p className="font-bold text-lg mt-1 text-foreground">
                                                                 {parseInt(detalle.cantidad, 10)}
                                                             </p>
                                                         </div>

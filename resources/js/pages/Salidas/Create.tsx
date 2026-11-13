@@ -13,6 +13,7 @@ export default function Create({ articulos = [], unidades = [] }: any) {
         fecha: getToday(), 
         motivo: '',
         tipo_salida: 'desincorporacion',
+        entidad_destino: '',
         observaciones: '',
         detalles: [{ _id: Date.now().toString(), articulo_id: '', articulo_unidad_id: '', cantidad: 1 }]
     });
@@ -32,7 +33,7 @@ export default function Create({ articulos = [], unidades = [] }: any) {
             <div className="p-4 md:p-6 w-full">
                 <div className="mb-6">
                     <h1 className="text-2xl font-bold tracking-tight">Registrar Salida</h1>
-                    <p className="text-muted-foreground">Puedes retirar consumibles o dar de baja un equipo serializado.</p>
+                    <p className="text-muted-foreground">Puedes retirar consumibles o dar de baja un equipo.</p>
                 </div>
 
                 <Form 

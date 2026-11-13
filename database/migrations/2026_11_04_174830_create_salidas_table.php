@@ -19,7 +19,10 @@ return new class extends Migration
             $table->string('motivo');
             
             // Los dos tipos de salida
-            $table->enum('tipo_salida', ['traslado', 'desincorporacion'])->default('desincorporacion');
+            $table->enum('tipo_salida', ['traspaso', 'desincorporacion'])->default('desincorporacion');
+
+            $table->string('entidad_destino')->nullable(); // Solo para traspasos
+            
 
             $table->date('fecha');
             $table->text('observaciones')->nullable();

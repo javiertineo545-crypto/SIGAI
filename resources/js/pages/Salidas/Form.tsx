@@ -51,14 +51,12 @@ export default function Form({ articulos = [], unidades = [], data, setData, err
         return Number(art?.control_individual) === 1;
     });
 
-    // Intercepta el botón de guardar para abrir el modal
     const handlePreSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (hayErrorDeStock) return;
-        setShowConfirm(true); // Abre la ventana de confirmación
+        setShowConfirm(true);
     };
 
-    // Confirmación final que envía los datos
     const handleConfirmSubmit = (e: React.FormEvent) => {
         setShowConfirm(false);
         onSubmit(e);
@@ -91,12 +89,15 @@ export default function Form({ articulos = [], unidades = [], data, setData, err
                             return (
                                 <div key={detalle._id || index} className={`w-full flex flex-col gap-2 p-3 rounded-lg border transition-all ${excede ? 'bg-destructive/5 border-destructive/50' : 'bg-muted/30'}`}>
                                     
-                                    <div className="w-full flex flex-col xl:flex-row gap-4 items-end">
+                                    <div className="w-full flex flex-col xl:flex-row gap-4 items-start">
                                         
+                                        {/* ARTÍCULO */}
                                         <div className="flex-1 w-full min-w-[200px] space-y-2">
-                                            <Label>Artículo</Label>
+                                            <div className="h-5 flex items-center">
+                                                <Label>Artículo <span className="text-red-500">*</span></Label>
+                                            </div>
                                             <Select value={detalle.articulo_id ? String(detalle.articulo_id) : undefined} onValueChange={(val) => updateRow(index, 'articulo_id', val)}>
-                                                <SelectTrigger className="w-full z-50 bg-background">
+                                                <SelectTrigger className="w-full h-10 z-50 bg-background">
                                                     <SelectValue placeholder="Seleccione artículo..." />
                                                 </SelectTrigger>
                                                 <SelectContent className="z-50">
@@ -107,11 +108,16 @@ export default function Form({ articulos = [], unidades = [], data, setData, err
                                             </Select>
                                         </div>
 
-                                        {esSerializado && (
-                                            <div className="flex-1 w-full min-w-[200px] space-y-2">
-                                                <Label className="text-primary font-semibold">Serial (Unidad)</Label>
+                                        {/* SERIAL */}
+                                        <div className="flex-1 w-full min-w-[200px] space-y-2">
+                                            <div className="h-5 flex items-center">
+                                                <Label className={esSerializado ? "text-slate-800 font-semibold" : "text-muted-foreground"}>
+                                                    Serial (Unidad) {esSerializado && <span className="text-red-500 ml-1">*</span>}
+                                                </Label>
+                                            </div>
+                                            {esSerializado ? (
                                                 <Select value={detalle.articulo_unidad_id ? String(detalle.articulo_unidad_id) : undefined} onValueChange={(val) => updateRow(index, 'articulo_unidad_id', val)}>
-                                                    <SelectTrigger className="w-full z-50 bg-background">
+                                                    <SelectTrigger className="w-full h-10 z-50 bg-background">
                                                         <SelectValue placeholder="Seleccione el serial..." />
                                                     </SelectTrigger>
                                                     <SelectContent className="z-50">
@@ -126,40 +132,64 @@ export default function Form({ articulos = [], unidades = [], data, setData, err
                                                         )}
                                                     </SelectContent>
                                                 </Select>
+                                            ) : (
+                                                <div className="h-10 flex items-center justify-center px-3 border border-input rounded-md bg-muted/50 text-muted-foreground">
+                                                    -
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* CANTIDAD */}
+                                        <div className="w-full md:w-32 space-y-2 shrink-0">
+                                            <div className="h-5 flex items-center">
+                                                <Label className={!esSerializado ? "text-slate-800 font-semibold" : "text-muted-foreground"}>
+                                                    Cantidad {!esSerializado && <span className="text-red-500 ml-1">*</span>}
+                                                </Label>
                                             </div>
-                                        )}
-
-                                        {!esSerializado && detalle.articulo_id && (
-                                            <>
-                                                <div className="w-full md:w-32 space-y-2 shrink-0">
-                                                    <Label className="text-primary font-semibold">Cantidad</Label>
-                                                    <Input 
-                                                        type="number" 
-                                                        min="1" 
-                                                        step="1"
-                                                        value={detalle.cantidad} 
-                                                        onChange={e => updateRow(index, 'cantidad', parseInt(e.target.value) || 1)}
-                                                        className={excede ? "border-destructive focus-visible:ring-destructive bg-background" : "bg-background"} 
-                                                    />
+                                            {!esSerializado ? (
+                                                <Input 
+                                                    type="number" 
+                                                    min="1" 
+                                                    step="1"
+                                                    value={detalle.cantidad} 
+                                                    onChange={e => updateRow(index, 'cantidad', parseInt(e.target.value) || 1)}
+                                                    className={`h-10 ${excede ? "border-destructive focus-visible:ring-destructive bg-background" : "bg-background"}`} 
+                                                />
+                                            ) : (
+                                                <div className="h-10 flex items-center justify-center px-3 border border-input rounded-md bg-muted/50 text-muted-foreground">
+                                                    -
                                                 </div>
-                                                <div className="w-full md:w-24 pb-3 text-sm font-medium shrink-0">
-                                                    <span className={excede ? "text-destructive font-bold" : "text-green-600"}>
-                                                        Disp: {stock}
+                                            )}
+                                        </div>
+
+                                        {/* DISPONIBLE */}
+                                        <div className="w-full md:w-24 space-y-2 shrink-0">
+                                            <div className="h-5 flex items-center">
+                                                <span className="text-xs text-muted-foreground">Disponible</span>
+                                            </div>
+                                            <div className="h-10 flex items-center">
+                                                {detalle.articulo_id && !esSerializado ? (
+                                                    <span className={excede ? "text-destructive font-bold" : "text-green-600 font-medium"}>
+                                                        {stock}
                                                     </span>
-                                                </div>
-                                            </>
-                                        )}
+                                                ) : <span className="text-muted-foreground">-</span>}
+                                            </div>
+                                        </div>
 
-                                        <Button 
-                                            type="button" 
-                                            variant="ghost" 
-                                            size="icon" 
-                                            onClick={() => removeRow(index)} 
-                                            disabled={data.detalles.length === 1} 
-                                            className="shrink-0 mb-0.5 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                                        >
-                                            <Trash2 className="h-5 w-5" />
-                                        </Button>
+                                        {/* BOTÓN ELIMINAR */}
+                                        <div className="w-full md:w-auto space-y-2 shrink-0">
+                                            <div className="h-5 hidden md:block"></div>
+                                            <Button 
+                                                type="button" 
+                                                variant="ghost" 
+                                                size="icon" 
+                                                onClick={() => removeRow(index)} 
+                                                disabled={data.detalles.length === 1} 
+                                                className="h-10 w-10 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                                            >
+                                                <Trash2 className="h-5 w-5" />
+                                            </Button>
+                                        </div>
                                     </div>
 
                                     {excede && (
@@ -183,34 +213,57 @@ export default function Form({ articulos = [], unidades = [], data, setData, err
                     <CardContent className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div className="space-y-2">
-                                <Label>Fecha</Label>
-                                <Input type="date" value={data.fecha} onChange={e => setData('fecha', e.target.value)} />
+                                <div className="h-5 flex items-center">
+                                    <Label>Fecha <span className="text-red-500 ml-1">*</span></Label>
+                                </div>
+                                <Input type="date" className="h-10" value={data.fecha} onChange={e => setData('fecha', e.target.value)} />
                                 {errors.fecha && <span className="text-sm text-destructive">{errors.fecha}</span>}
                             </div>
                             <div className="space-y-2">
-                                <Label>Motivo Breve</Label>
-                                <Input placeholder="Ej: Requerimiento de personal" value={data.motivo} onChange={e => setData('motivo', e.target.value)} />
+                                <div className="h-5 flex items-center">
+                                    <Label>Motivo Breve <span className="text-red-500 ml-1">*</span></Label>
+                                </div>
+                                <Input className="h-10" placeholder="Ej: Requerimiento de personal" value={data.motivo} onChange={e => setData('motivo', e.target.value)} />
                                 {errors.motivo && <span className="text-sm text-destructive">{errors.motivo}</span>}
                             </div>
                             
                             {tieneEquipos && (
                                 <div className="space-y-2">
-                                    <Label>Tipo de Salida</Label>
+                                    <div className="h-5 flex items-center">
+                                        <Label>Tipo de Salida <span className="text-red-500 ml-1">*</span></Label>
+                                    </div>
                                     <Select value={data.tipo_salida} onValueChange={(val) => setData('tipo_salida', val)}>
-                                        <SelectTrigger className="w-full">
+                                        <SelectTrigger className="w-full h-10">
                                             <SelectValue placeholder="Seleccione el tipo..." />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="traslado">Traslado (Temporal)</SelectItem>
-                                            <SelectItem value="desincorporacion">Desincorporación (Baja Definitiva)</SelectItem>
+                                            <SelectItem value="traspaso">Traspaso</SelectItem>
+                                            <SelectItem value="desincorporacion">Desincorporación</SelectItem>
                                         </SelectContent>
                                     </Select>
                                     {errors.tipo_salida && <span className="text-sm text-destructive">{errors.tipo_salida}</span>}
                                 </div>
                             )}
+
+                            {data.tipo_salida === 'traspaso' && (
+                                <div className="space-y-2 md:col-span-3">
+                                    <div className="h-5 flex items-center">
+                                        <Label>Entidad o Persona que Recibe el Bien <span className="text-red-500 ml-1">*</span></Label>
+                                    </div>
+                                    <Input 
+                                        className="h-10"
+                                        placeholder="Ej: Alcaldía, Oficina de Recursos Humanos, etc." 
+                                        value={data.entidad_destino} 
+                                        onChange={e => setData('entidad_destino', e.target.value)} 
+                                    />
+                                    {errors.entidad_destino && <span className="text-sm text-destructive">{errors.entidad_destino}</span>}
+                                </div>
+                            )}
                             
                             <div className="space-y-2 md:col-span-3">
-                                <Label>Observaciones (Opcional)</Label>
+                                <div className="h-5 flex items-center">
+                                    <Label>Observaciones (Opcional)</Label>
+                                </div>
                                 <Textarea value={data.observaciones} onChange={e => setData('observaciones', e.target.value)} rows={2} />
                             </div>
                         </div>
@@ -219,14 +272,11 @@ export default function Form({ articulos = [], unidades = [], data, setData, err
 
                 <div className="flex justify-end gap-2">
                     <Button variant="outline" type="button" asChild><Link href={route('salidas.index')}>Cancelar</Link></Button>
-                    {/* Este botón ahora abre el Modal en lugar de guardar directo */}
-                    <Button type="submit" disabled={processing || hayErrorDeStock}>
-                        {processing ? 'Guardando...' : submitLabel}
-                    </Button>
+                    <Button type="submit" disabled={processing || hayErrorDeStock}>{processing ? 'Guardando...' : submitLabel}</Button>
                 </div>
             </form>
 
-            {/* VENTANA DE CONFIRMACIÓN */}
+            {/* MODAL DE CONFIRMACIÓN */}
             <Dialog open={showConfirm} onOpenChange={setShowConfirm}>
                 <DialogContent className="max-w-2xl">
                     <DialogHeader>
@@ -254,39 +304,21 @@ export default function Form({ articulos = [], unidades = [], data, setData, err
                                     <p className="font-bold text-primary capitalize">{data.tipo_salida}</p>
                                 </div>
                             )}
-                        </div>
-
-                        <div className="pt-2">
-                            <p className="text-xs text-muted-foreground mb-2">Artículos a Retirar:</p>
-                            <div className="space-y-2 max-h-[200px] overflow-y-auto pr-2">
-                                {data.detalles.map((detalle: any, i: number) => {
-                                    const art = getArticuloInfo(detalle.articulo_id);
-                                    const uni = getUnidadInfo(detalle.articulo_unidad_id);
-                                    return (
-                                        <div key={i} className="flex items-start gap-2 bg-background p-2 rounded border shadow-sm">
-                                            <Package className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
-                                            <div>
-                                                <p className="text-sm font-semibold text-red-600">{art?.nombre}</p>
-                                                {uni && (
-                                                    <p className="text-xs text-muted-foreground">
-                                                        <strong>ID:</strong> {uni.identificador} | <strong>Serial:</strong> {uni.serial || 'N/A'}
-                                                    </p>
-                                                )}
-                                                <p className="text-xs font-bold mt-1 text-slate-700">
-                                                    Cantidad: {detalle.cantidad}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
+                            {data.tipo_salida === 'traspaso' && data.entidad_destino && (
+                                <div className="col-span-2">
+                                    <p className="text-xs text-muted-foreground">Entregado a:</p>
+                                    <p className="font-semibold">{data.entidad_destino}</p>
+                                </div>
+                            )}
                         </div>
                     </div>
 
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setShowConfirm(false)}>Cancelar</Button>
-                        <Button onClick={handleConfirmSubmit} disabled={processing} className="bg-primary text-primary-foreground">
-                            {processing ? 'Guardando...' : 'Sí, registrar salida'}
+                        <Button type="button" variant="outline" onClick={() => setShowConfirm(false)}>
+                            Cancelar
+                        </Button>
+                        <Button type="button" onClick={(e) => handleConfirmSubmit(e)} disabled={processing}>
+                            {processing ? 'Guardando...' : submitLabel}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

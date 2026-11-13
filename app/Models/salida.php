@@ -14,6 +14,7 @@ class Salida extends Model
         'usuario_id',
         'motivo',
         'tipo_salida',
+        'entidad_destino',
         'fecha',
         'observaciones',
     ];

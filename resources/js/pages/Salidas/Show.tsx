@@ -14,7 +14,7 @@ const formatFecha = (fechaString: string) => {
 
 const formatTipo = (tipo: string) => {
     const tipos: Record<string, string> = {
-        'traslado': 'Traslado',
+        'traspaso': 'traspaso',
         'desincorporacion': 'Desincorporación'
     };
     return tipos[tipo] || tipo || 'No aplica';
@@ -50,7 +50,7 @@ export default function Show({ salida }: any) {
                         </div>
                         <div>
                             <p className="text-sm text-muted-foreground">Tipo de Salida</p>
-                            <p className={`font-bold ${salida.tipo_salida === 'traslado' ? 'text-orange-500' : 'text-red-500'}`}>
+                            <p className={`font-bold ${salida.tipo_salida === 'traspaso' ? 'text-orange-500' : 'text-red-500'}`}>
                                 {formatTipo(salida.tipo_salida)}
                             </p>
                         </div>

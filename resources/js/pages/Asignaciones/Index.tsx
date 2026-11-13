@@ -4,25 +4,25 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DataTable } from '@/components/data-table';
 import { getColumns } from './columns';
-import { Plus, Search, CheckCircle2, Laptop, User, Calendar, AlertCircle, Package } from 'lucide-react';
+import { Plus, Search, CheckCircle2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Can } from "@/components/can";
-import QRCodeDisplay from '@/components/QRCodeDisplay';
 
-const formatFecha = (fechaString: string) => {
-    if (!fechaString) return 'N/A';
-    const soloFecha = fechaString.split('T')[0]; 
-    const [year, month, day] = soloFecha.split('-');
-    return `${day}/${month}/${year}`; 
-};
+// Importaciones modales
+import ViewModal from '@/components/DevolverModal';
+import DevolverModal from '@/components/DevolverModal';
+import ReasignarModal from '@/components/ReasignarModal';
 
-export default function Index({ asignaciones, filters }: any) {
-    const [search, setSearch] = useState(filters.search || '');
+export default function Index({ asignaciones, filters, personnels = [], ubicaciones = [] }: any) {
+    const [search, setSearch] = useState(filters?.search || '');
     const { props } = usePage();
     const flash = props.flash as { success?: string };
     const [showSuccess, setShowSuccess] = useState(false);
+    
+    // Estados para controlar qué modal está abierto
     const [selectedAsignacion, setSelectedAsignacion] = useState<any>(null);
+    const [asignacionToDevolver, setAsignacionToDevolver] = useState<any>(null);
+    const [asignacionToReasignar, setAsignacionToReasignar] = useState<any>(null);
 
     useEffect(() => {
         if (flash?.success) {
@@ -37,7 +37,11 @@ export default function Index({ asignaciones, filters }: any) {
         router.get(route('asignaciones.index'), { search }, { preserveState: true });
     };
 
-    const columns = getColumns((asignacion) => setSelectedAsignacion(asignacion));
+    const columns = getColumns(
+        (asignacion) => setSelectedAsignacion(asignacion),
+        (asignacion) => setAsignacionToDevolver(asignacion),
+        (asignacion) => setAsignacionToReasignar(asignacion)
+    );
 
     return (
         <AppLayout breadcrumbs={[{ title: 'Asignaciones', href: route('asignaciones.index') }]}>
@@ -54,7 +58,7 @@ export default function Index({ asignaciones, filters }: any) {
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight">Asignaciones</h1>
-                        <p className="text-muted-foreground">Control de equipos y consumibles entregados a los trabajadores.</p>
+                        <p className="text-muted-foreground">Historial de equipos y consumibles entregados al personal.</p>
                     </div>
                     
                     <Can permission="asignaciones.create">
@@ -67,123 +71,36 @@ export default function Index({ asignaciones, filters }: any) {
                 </div>
 
                 <form onSubmit={handleSearch} className="flex gap-2 max-w-md">
-                    <Input placeholder="Buscar por equipo o trabajador..." value={search} onChange={(e) => setSearch(e.target.value)} className="flex-1" />
+                    <Input placeholder="Buscar por artículo o trabajador..." value={search} onChange={(e) => setSearch(e.target.value)} className="flex-1" />
                     <Button type="submit" variant="secondary"><Search className="h-4 w-4" /></Button>
                 </form>
 
                 <div className="rounded-md border bg-card">
-                    <DataTable columns={columns} data={asignaciones.data} paginationLinks={asignaciones.links} />
+                    <DataTable columns={columns} data={asignaciones.data} />
                 </div>
             </div>
 
-            <Dialog open={!!selectedAsignacion} onOpenChange={(open) => !open && setSelectedAsignacion(null)}>
-                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                    <DialogHeader>
-                        <DialogTitle className="text-xl">Detalle de la Asignación</DialogTitle>
-                        <DialogDescription>Información de la entrega y del equipo.</DialogDescription>
-                    </DialogHeader>
+            {/* RENDERIZADO DE LOS MODALES */}
+            <ViewModal 
+                asignacion={selectedAsignacion} 
+                isOpen={!!selectedAsignacion} 
+                onClose={() => setSelectedAsignacion(null)} 
+            />
 
-                    {selectedAsignacion && (
-                        <div className="space-y-6 mt-4">
-                            
-                            <div className="bg-muted/30 p-5 rounded-lg border border-slate-200">
-                                <h3 className="flex items-center gap-2 font-bold mb-4 text-slate-800">
-                                    <User className="h-5 w-5" /> Datos de la Asignación
-                                </h3>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                    <div>
-                                        <p className="text-xs text-muted-foreground">Trabajador</p>
-                                        <p className="font-bold text-lg">{selectedAsignacion.trabajador_nombre}</p>
-                                        <p className="text-sm text-muted-foreground">C.I: {selectedAsignacion.trabajador_cedula}</p>
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-muted-foreground">Fecha de Asignación</p>
-                                        <p className="font-medium text-base">{formatFecha(selectedAsignacion.fecha_asignacion)}</p>
-                                    </div>
-                                    {selectedAsignacion.es_equipo && (
-                                        <div>
-                                            <p className="text-xs text-muted-foreground">Estado Actual</p>
-                                            <p className={`font-bold text-base ${selectedAsignacion.estado === 'activa' ? 'text-green-600' : 'text-gray-500'}`}>
-                                                {selectedAsignacion.estado === 'activa' ? 'ACTIVA' : 'DEVUELTA'}
-                                            </p>
-                                        </div>
-                                    )}
-                                </div>
-                                <div className="mt-4 pt-4 border-t border-slate-200">
-                                    <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
-                                        <AlertCircle className="h-3 w-3" /> Observaciones
-                                    </p>
-                                    <p className="whitespace-pre-wrap text-sm text-slate-700">
-                                        {selectedAsignacion.observaciones || 'Sin observaciones registradas.'}
-                                    </p>
-                                </div>
-                            </div>
+            <DevolverModal 
+                asignacion={asignacionToDevolver} 
+                isOpen={!!asignacionToDevolver} 
+                onClose={() => setAsignacionToDevolver(null)} 
+            />
 
-                            <div className="bg-muted/30 p-5 rounded-lg border border-slate-200 w-full transition-all duration-300">
-                                <h3 className="flex items-center gap-2 font-bold mb-4 text-slate-800">
-                                    {selectedAsignacion.es_equipo ? <Laptop className="h-5 w-5" /> : <Package className="h-5 w-5" />} 
-                                    {selectedAsignacion.es_equipo ? 'Equipo Entregado' : 'Consumible Entregado'}
-                                </h3>
-                                
-                                {selectedAsignacion.es_equipo ? (
-                                    <div className="flex flex-col md:flex-row gap-6 items-start">
-                                        <div className="space-y-4 border-l-4 border-blue-500 pl-4 flex-1">
-                                            <div>
-                                                <p className="text-xs text-muted-foreground">Artículo</p>
-                                                <p className="font-bold text-red-600 text-xl">
-                                                    {selectedAsignacion.articulo_nombre}
-                                                </p>
-                                                <p className="text-sm text-muted-foreground">
-                                                    {selectedAsignacion.marca} - {selectedAsignacion.modelo}
-                                                </p>
-                                            </div>
-                                            
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div>
-                                                    <p className="text-xs text-muted-foreground">ID del Equipo</p>
-                                                    <p className="font-medium text-base">{selectedAsignacion.identificador}</p>
-                                                </div>
-                                                <div>
-                                                    <p className="text-xs text-muted-foreground">Serial Físico</p>
-                                                    <p className="font-medium text-base">{selectedAsignacion.serial !== 'N/A' ? selectedAsignacion.serial : 'No registrado'}</p>
-                                                </div>
-                                            </div>
-                                        </div>
+            <ReasignarModal 
+                asignacion={asignacionToReasignar} 
+                personnels={personnels}
+                ubicaciones={ubicaciones}
+                isOpen={!!asignacionToReasignar} 
+                onClose={() => setAsignacionToReasignar(null)} 
+            />
 
-                                        {selectedAsignacion.identificador !== 'N/A' && (
-                                            <div className="shrink-0 w-full md:w-auto flex justify-center">
-                                                <QRCodeDisplay 
-                                                    value={selectedAsignacion.identificador} 
-                                                    articulo={selectedAsignacion.articulo_nombre}
-                                                    serial={selectedAsignacion.serial}
-                                                    label="Código QR" 
-                                                />
-                                            </div>
-                                        )}
-                                    </div>
-                                ) : (
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-l-4 border-blue-500 pl-4">
-                                        <div className="md:col-span-2">
-                                            <p className="text-xs text-muted-foreground">Artículo</p>
-                                            <p className="font-bold text-red-600 text-xl">
-                                                {selectedAsignacion.articulo_nombre}
-                                            </p>
-                                            <p className="text-sm text-muted-foreground">
-                                                {selectedAsignacion.marca} - {selectedAsignacion.modelo}
-                                            </p>
-                                        </div>
-                                        <div>
-                                            <p className="text-xs text-muted-foreground">Cantidad Entregada</p>
-                                            <p className="font-bold text-xl mt-1">{parseInt(selectedAsignacion.cantidad, 10)}</p>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-
-                        </div>
-                    )}
-                </DialogContent>
-            </Dialog>
         </AppLayout>
     );
 }

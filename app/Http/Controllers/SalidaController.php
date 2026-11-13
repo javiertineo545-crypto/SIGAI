@@ -16,7 +16,7 @@ class SalidaController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:salidas.view')->only(['index', 'show', 'showArticulo']);
+        $this->middleware('permission:salidas.view')->only(['index', 'show']);
         $this->middleware('permission:salidas.create')->only(['create', 'store']);
         $this->middleware('permission:salidas.edit')->only(['edit', 'update']);
         $this->middleware('permission:salidas.delete')->only(['destroy']);
@@ -41,6 +41,7 @@ class SalidaController extends Controller
                 'fecha' => $salida->fecha,
                 'motivo' => $salida->motivo,
                 'tipo_salida' => $salida->tipo_salida,
+                'entidad_destino' => $salida->entidad_destino,
                 'observaciones' => $salida->observaciones,
                 'usuario_name' => $salida->usuario?->name ?? 'Desconocido',
                 'usuario_cedula' => $salida->usuario?->personnel?->id_number ?? 'N/A',
@@ -65,11 +66,10 @@ class SalidaController extends Controller
         $articulos = Articulo::with(['marca:id,nombre', 'categoria:id,nombre', 'referencia:id,codigo'])
             ->where('stock', '>', 0)->orderBy('nombre')->get();
 
-        // REGLA ESTRICTA: Equipos que no estén asignados y que no estén ya en una salida
         $unidades = ArticuloUnidad::with(['articulo:id,nombre'])
             ->whereHas('articulo', fn($q) => $q->where('control_individual', 1))
             ->whereDoesntHave('asignaciones', fn($q) => $q->where('estado', 'activa'))
-            ->whereDoesntHave('salidasDetalle') // <-- ESTO ES LA MAGIA
+            ->whereDoesntHave('salidasDetalle')
             ->get();
 
         return inertia('Salidas/Create', ['articulos' => $articulos, 'unidades' => $unidades]);
@@ -79,7 +79,8 @@ class SalidaController extends Controller
     {
         $data = $request->validate([
             'motivo' => ['required', 'string', 'max:255'],
-            'tipo_salida' => ['nullable', 'in:traslado,desincorporacion'],
+            'tipo_salida' => ['nullable', 'in:traspaso,desincorporacion'],
+            'entidad_destino' => ['nullable', 'string', 'max:255'],
             'fecha' => ['required', 'date'],
             'observaciones' => ['nullable', 'string'],
             'detalles' => ['required', 'array', 'min:1'],
@@ -93,11 +94,12 @@ class SalidaController extends Controller
                 'usuario_id' => Auth::id(),
                 'motivo' => $data['motivo'],
                 'tipo_salida' => $data['tipo_salida'] ?? 'desincorporacion',
+                'entidad_destino' => $data['tipo_salida'] === 'traspaso' ? ($data['entidad_destino'] ?? null) : null,
                 'fecha' => $data['fecha'],
                 'observaciones' => $data['observaciones'] ?? null,
             ]);
 
-            $this->procesarDetalles($salida, $data['detalles'], $data['tipo_salida'] ?? 'desincorporacion');
+            $this->procesarDetalles($salida, $data['detalles']);
         });
 
         return redirect()->route('salidas.index')->with('success', 'Salida registrada correctamente.');
@@ -113,7 +115,6 @@ class SalidaController extends Controller
             ->where(function($query) use ($salida) {
                 $query->whereDoesntHave('asignaciones', fn($q) => $q->where('estado', 'activa'))
                       ->whereDoesntHave('salidasDetalle');
-                // Incluimos las unidades de esta misma salida para que no desaparezcan al editar
                 $query->orWhereIn('id', $salida->detalles->pluck('articulo_unidad_id')->filter());
             })->get();
 
@@ -124,7 +125,8 @@ class SalidaController extends Controller
     {
         $data = $request->validate([
             'motivo' => ['required', 'string', 'max:255'],
-            'tipo_salida' => ['nullable', 'in:traslado,desincorporacion'],
+            'tipo_salida' => ['nullable', 'in:traspaso,desincorporacion'],
+            'entidad_destino' => ['nullable', 'string', 'max:255'],
             'fecha' => ['required', 'date'],
             'observaciones' => ['nullable', 'string'],
             'detalles' => ['required', 'array', 'min:1'],
@@ -134,7 +136,7 @@ class SalidaController extends Controller
         ]);
 
         DB::transaction(function () use ($data, $salida) {
-            $salida->load('detalles.articuloUnidad');
+            $salida->load('detalles');
             
             foreach ($salida->detalles as $detalle) {
                 $articulo = Articulo::lockForUpdate()->find($detalle->articulo_id);
@@ -142,14 +144,16 @@ class SalidaController extends Controller
             }
 
             $salida->detalles()->delete();
+            
             $salida->update([
                 'motivo' => $data['motivo'],
                 'tipo_salida' => $data['tipo_salida'] ?? 'desincorporacion',
+                'entidad_destino' => $data['tipo_salida'] === 'traspaso' ? ($data['entidad_destino'] ?? null) : null,
                 'fecha' => $data['fecha'],
                 'observaciones' => $data['observaciones'] ?? null,
             ]);
 
-            $this->procesarDetalles($salida, $data['detalles'], $data['tipo_salida'] ?? 'desincorporacion');
+            $this->procesarDetalles($salida, $data['detalles']);
         });
 
         return redirect()->route('salidas.index')->with('success', 'Salida actualizada correctamente.');
@@ -164,7 +168,7 @@ class SalidaController extends Controller
     public function destroy(Salida $salida)
     {
         DB::transaction(function () use ($salida) {
-            $salida->load('detalles.articuloUnidad');
+            $salida->load('detalles');
             foreach ($salida->detalles as $detalle) {
                 $articulo = Articulo::lockForUpdate()->find($detalle->articulo_id);
                 if ($articulo) $articulo->increment('stock', $detalle->cantidad);
@@ -175,7 +179,7 @@ class SalidaController extends Controller
         return redirect()->route('salidas.index')->with('success', 'Salida eliminada correctamente.');
     }
 
-    private function procesarDetalles($salida, $detalles, $tipoSalida)
+    private function procesarDetalles($salida, $detalles)
     {
         foreach ($detalles as $detalle) {
             $articulo = Articulo::lockForUpdate()->findOrFail($detalle['articulo_id']);
@@ -188,9 +192,8 @@ class SalidaController extends Controller
 
                 $unidad = ArticuloUnidad::lockForUpdate()->findOrFail($detalle['articulo_unidad_id']);
                 
-                // BARRERA DE SEGURIDAD DIRECTA
                 if ($unidad->salidasDetalle()->exists()) {
-                    throw ValidationException::withMessages(['detalles' => "El equipo {$unidad->identificador} ya fue registrado en una salida anterior."]);
+                    throw ValidationException::withMessages(['detalles' => "El equipo {$unidad->identificador} ya está en una salida."]);
                 }
                 if (Asignacion::where('articulo_unidad_id', $unidad->id)->where('estado', 'activa')->exists()) {
                     throw ValidationException::withMessages(['detalles' => "El equipo {$unidad->identificador} está asignado actualmente."]);
@@ -202,6 +205,13 @@ class SalidaController extends Controller
                     'cantidad' => 1,
                 ]);
                 $articulo->decrement('stock', 1);
+
+                $estadoBaja = EstadoArticulo::where('nombre', 'De Baja')->first() 
+                           ?? EstadoArticulo::where('nombre', 'Inactivo')->first();
+                
+                if ($estadoBaja) {
+                    $unidad->update(['estado_id' => $estadoBaja->id]);
+                }
 
             } else {
                 if ((int) $articulo->stock < $cantidad) {

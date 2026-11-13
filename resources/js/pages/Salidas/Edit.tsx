@@ -8,6 +8,7 @@ export default function Edit({ salida, articulos = [], unidades = [] }: any) {
         fecha: salida.fecha ? salida.fecha.split('T')[0] : '',
         motivo: salida.motivo || '',
         tipo_salida: salida.tipo_salida || 'desincorporacion',
+        entidad_destino: salida.entidad_destino || '',
         observaciones: salida.observaciones || '',
         detalles: salida.detalles?.map((d: any) => ({
             _id: Date.now().toString() + Math.random().toString(),
